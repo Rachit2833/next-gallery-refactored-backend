@@ -5,9 +5,7 @@ const mongoose = require("mongoose");
 dotenv.config({ path: "./config.env" });
 const PORT = process.env.PORT;
 const DB = process.env.DATA_BASE;
-const labelSchema = require("./Schema/labelSchema");
 app.use(express.json());
-
 async function startServer() {
   try {
     await mongoose.connect(DB);
