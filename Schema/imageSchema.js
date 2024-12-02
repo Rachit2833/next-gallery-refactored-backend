@@ -5,6 +5,7 @@ const ImageLabelSchema = new mongoose.Schema(
   {
     ImageUrl: String,
     Country: String,
+    Favourite: Boolean,
     Location: {
       name: {
         type: String,
@@ -32,6 +33,7 @@ const ImageLabelSchema = new mongoose.Schema(
       default: Date.now, // Automatically set the date to the current date and time
     },
     People: [{ type: mongoose.Schema.Types.ObjectId, ref: "Label" }], // Reference to Label collection
+    
   },
 
   {
