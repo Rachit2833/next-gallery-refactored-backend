@@ -1,23 +1,24 @@
 "use client"
 import img from "@/app/dune.jpg";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { CardDescription } from "@/components/ui/card";
-import Image from "next/image";
 import {
    ContextMenu,
    ContextMenuContent,
    ContextMenuItem,
    ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { useUser } from "../_lib/context";
 import { saveAs } from 'file-saver';
+import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog";
-import Router from "next/router";
-import { deleteImagesAction } from "../_lib/actions";
-import { useFormStatus } from 'react-dom'
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useFormStatus } from 'react-dom';
+import { deleteImagesAction, updateFavourite } from "../_lib/actions";
+import { useUser } from "../_lib/context";
+import { Check, Star } from "lucide-react";
 function ImageCard({ image}) {
+   console.log(image,"image");
    const currentPath = usePathname(); 
    const { setIsImageOpen } = useUser();
    const searchParams= useSearchParams()
@@ -58,12 +59,11 @@ function ImageCard({ image}) {
    }
 
    return (
-      <div className="mx-auto bg-white rounded-lg shadow-md p-4 w-full max-w-xs lg:max-w-sm">
+      <div className={`mx-auto ${image.Favourite ? "bg-[#e3d380]" : "bg-white"} rounded-lg shadow-md p-4 w-full max-w-xs lg:max-w-sm`}>
          <div
             className="relative w-full h-[15rem] bg-gray-200 rounded-t-lg cursor-pointer overflow-hidden"
-            onClick={() => setIsImageOpen(true)}
+            onClick={() => setIsImageOpen(true)} 
          > 
-         {isLoading?<h1>hello world</h1>:null}
             <Image
                src={img}
                alt="Placeholder"
@@ -77,12 +77,12 @@ function ImageCard({ image}) {
                <div className="overflow-y-auto max-h-24 mt-2">
                   <CardDescription>Arrakis</CardDescription>
                   <p className="heading">Whereas recognition</p>
-                  <div className="text-xs text-gray-500 mt-4 sm:block hidden">
-                     By{" "}
-                     <span className="font-semibold hover:cursor-pointer">
-                        Author Name
-                     </span>{" "}
-                     {logTimeDifference("2024-09-29T10:00:00")}
+                  <div className="text-xs  text-gray-500 mt-4 sm:block hidden">
+                     <p> By{" "}
+                        <span className="font-semibold hover:cursor-pointer">
+                           Author Name
+                        </span>{" "}
+                        {logTimeDifference("2024-09-29T10:00:00")}</p>
                   </div>
                </div>
                <ContextMenuContent>
@@ -104,14 +104,18 @@ function ImageCard({ image}) {
                            </AlertDialogHeader>
                            <AlertDialogFooter>
                            <form  action={deleteImagesAction} >
-                              <input type="hidden" name="imageId"  />
+                              <input type="hidden" value={image._id} name="imageId"  />
                               <AlertDialogCancel className=" mx-2">Cancel</AlertDialogCancel>
                               <Deletebutton />
                            </form>
                            </AlertDialogFooter>
                         </AlertDialogContent>
                      </AlertDialog>
-                  <ContextMenuItem>Favourite</ContextMenuItem>
+                  <form action={updateFavourite} >
+                     <input type="hidden" value={image._id} name="imageId" /> 
+                     <input type="hidden" value={image.Favourite} name="favValue" /> 
+                     <ContextMenuItem><button className=" flex justify-end align-middle" type="submit">Favourite {image.Favourite ? <span className=" ml-4"><Check /></span> : null}</button></ContextMenuItem>
+                  </form>
                </ContextMenuContent>
             </ContextMenuTrigger>
          </ContextMenu>

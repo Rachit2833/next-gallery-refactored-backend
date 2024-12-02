@@ -21,12 +21,6 @@ export async function updateName(formData) {
 }
 export async function deleteImagesAction(formData) {
   const imageId = formData.get("imageId");
-  console.log(imageId);
-  if (!imageId) {
-    console.error("Image ID is missing");
-    return;
-  }
-
   try {
     const res = await fetch(`http://localhost:2833/image?img_id=${imageId}`, {
       method: "DELETE",
@@ -64,6 +58,7 @@ export async function createNewAlbum(formData) {
 }
 export async function deleteAlbumAction(formData) {
   const id = formData.get("albumId");
+  console.log(id);
   try {
     const data = await fetch(`http://localhost:2833/album/${id}`, {
       method: "DELETE",
@@ -74,5 +69,28 @@ export async function deleteAlbumAction(formData) {
     revalidatePath("/albums");
   } catch (error) {
     throw new Error(`Failed to delete Album `);
+  }
+}
+export async function updateFavourite(formData) {
+  const id = formData.get("imageId");
+  const favValue = formData.get("favValue") === "true"; // Ensures boolean conversion
+  try {
+    const data = await fetch(`http://localhost:2833/image/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ Favourite: !favValue }), // Negating correctly
+    });
+
+    // Check if the request was successful
+    if (!data.ok) {
+      throw new Error("Failed to update favourite");
+    }
+
+    revalidatePath("/");
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to update favourite");
   }
 }
