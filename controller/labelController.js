@@ -81,5 +81,42 @@ async function getLabelByName(req, res) {
     });
   }
 }
+async function getLabelById(req, res) {
+  try {
+    // Access the name parameter from the request
+    let _id = req.params.id;
 
-module.exports = { getAllLabels, addNewLabel, deleteLabel, getLabelByName };
+
+    // Use req.body.userId or default to "rachit28"
+    const userId = req.body.userId || "rachit28";
+
+    // Find labels with matching userId and the name parameter
+    const labels = await Label.find({ userId, _id }); // Modify the query if needed
+    res.status(200).json(labels);
+  } catch (error) {
+    console.error("Error fetching labels:", error);
+    res.status(500).json({
+      error: "Failed to fetch labels",
+    });
+  }
+}
+async function updateLabel(req, res) {
+  try {
+      if(req.body.label===""){
+        res.status(400).json({
+          message:"Name Should Be there"
+        })
+      }
+      let id = req.params.id;
+      console.log(id);
+     const resData = await Label.findByIdAndUpdate(id, req.body,{new:true});
+    res.status(200).json({
+      message: "Success",
+    });
+    console.log(id);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+module.exports = { getAllLabels, addNewLabel, deleteLabel, getLabelByName,updateLabel,getLabelById };
