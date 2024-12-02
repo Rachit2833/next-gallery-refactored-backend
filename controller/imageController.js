@@ -160,8 +160,24 @@ async function deleteImage(req,res){
     })
  }
 }
+async function setAndUnsetFavourite(req,res) {
+   const id = new mongoose.Types.ObjectId(String(req.params.id));
+  const favValue=req.body.Favourite;
+  console.log(favValue,"kbjn");
+  try {
+    const data = await Image.findByIdAndUpdate(id,{ Favourite: favValue },{ new: true });
+    res.status(200).json({
+      message:"Success",
+      data:data
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Something Went Wrong",
+    });
+  }
+}
 
 
 
-module.exports = { addNewImage,deleteImage, getAllImages,getImageById, test, getAllImagesForLocation , getAllLocations };
+module.exports = { setAndUnsetFavourite,addNewImage,deleteImage, getAllImages,getImageById, test, getAllImagesForLocation , getAllLocations };
 
