@@ -27,7 +27,7 @@ function MapView({ imageCard, Location, sideField, yearRange, paramLoc }) {
                <Map Location={Location} isOpen={isOpen} setIsOpen={setIsOpen} paramLoc={paramLoc} />
                <Card className=" col-span-2 ">
                   <CardContent className=" m-4 p-0">
-                     <Filter paramName="yearRange" values={filterArray} defaultValue="All" />
+                     <Filter paramName="yearRange" year={yearRange} values={filterArray} defaultValue="All" />
                      <Suspense key={yearRange}   fallback={<MapSideOptionLoader />}>
                         {sideField}
                      </Suspense>

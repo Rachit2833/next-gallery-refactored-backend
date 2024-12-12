@@ -12,12 +12,8 @@ import {
 } from "@/components/ui/drawer"
 
 import { PlusCircle } from "lucide-react"
-import dynamic from 'next/dynamic';
-const FileForm = dynamic(() => import('./FileForm'), {
-   ssr: false, // Set this to true or false depending on whether you want server-side rendering
-});
-
 import { Button } from "@/components/ui/button"
+import FileForm from "./FileForm"
 
 function DrawerClick({name,style}) {
    return (
@@ -38,9 +34,7 @@ function DrawerClick({name,style}) {
 
                     <FileForm />
 
-                     <Button>Submit</Button>
-
-                     <DrawerClose className=" border-2 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 px-4 py-2 bg-white text-black shadow  " >  Cancel </DrawerClose>
+                    
 
                   </DrawerFooter>
                </div>

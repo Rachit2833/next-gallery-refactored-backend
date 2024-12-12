@@ -1,12 +1,29 @@
 "use client"
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import ImageCard from "../ImageCard";
 import Uploadcard from "../UploadCard";
+import { useUser } from "@/app/_lib/context";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-function PasteCards({res}) {
-
+function PasteCards({res,cod,frId,query}) {
+   const router = useRouter();
+   const searchParams = useSearchParams()
+   const pathName = usePathname()
+   const { searchData, setQueryState, } = useUser()
    const [images, setImages] = useState([]);
    const [imageFiles, setImageFiles] = useState([]);
+   useEffect(()=>{
+      if(!query){
+         const params = new URLSearchParams(searchParams)
+         params.delete("cod")
+         params.delete("frId")
+         params.delete("query")
+         router.replace(`${pathName}?${params}`, { scroll: false })
+      }
+   },[query])
+   useEffect(()=>{
+      setQueryState(query)
+   },[cod,frId,query])
    const arrayImage = [
       "/labels/Rachit/1.JPG", "/labels/Rachit/2.JPG",
       "/labels/Rohit/1.JPG", "/labels/Rohit/2.webp",
@@ -46,16 +63,16 @@ function PasteCards({res}) {
          document.removeEventListener("paste", handlePaste);
       };
    }, [handlePaste]);
-
-
    return (
       <div className="grid md:grid-cols-3 grid-cols-2 gap-4 ">
          {images?.map((item, index) => (
             <Uploadcard key={index} img={item.imageUrl} />
          ))}
 
-        {res?.map((item, index) => (
-         <ImageCard key={index} image={item}  />
+         {cod && searchData ? searchData?.LocationData[0]?.data.map((item, index)=>(
+            <ImageCard key={index} image={item} text={"From Search "} />
+         )) : res?.map((item, index) => (
+            <ImageCard key={index} image={item} />
          ))}
 
       </div>

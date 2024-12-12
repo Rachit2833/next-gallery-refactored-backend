@@ -7,7 +7,7 @@ import DrawerClick from "./DrawerClick"
 import Filter from "./Filter"
 import { usePathname } from "next/navigation"
 
-function SideFilterLayout() {
+function SideFilterLayout({year}) {
    const pathname = usePathname()
    const filterArray = [
       { label: "All", value: "All" },
@@ -21,6 +21,7 @@ function SideFilterLayout() {
             paramName="year"
             values={filterArray}
             defaultValue="All"
+            year={year}
          />
             <div className="ml-auto flex items-center gap-2">
                <DropdownMenu>

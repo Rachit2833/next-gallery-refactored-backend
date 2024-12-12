@@ -94,3 +94,18 @@ export async function updateFavourite(formData) {
     throw new Error("Failed to update favourite");
   }
 }
+export async function saveNewImage(formData) {
+    const data= new FormData()
+    data.append('photo',formData.get("photo"))
+    data.append('Location',"Arrakis")
+    data.append('Description',"hello world")
+   try {
+     const res = await fetch("http://localhost:2833/image/", {
+       method: "POST",
+       body:data
+     });
+   } catch (error) {
+     console.error(error);
+   }
+
+}

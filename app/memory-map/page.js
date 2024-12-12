@@ -1,6 +1,7 @@
 import MapSideImages from "../_MyComponents/MapComponents/MapSideImages";
 import MapSideOption from "../_MyComponents/MapComponents/MapSideOption";
 import MapWrapper from "../_MyComponents/MapComponents/MapWrapper";
+import SideFilterLayout from "../_MyComponents/SideFilterLayout";
 
 export const revalidate = 0;
 async function page({searchParams}) {
@@ -13,6 +14,7 @@ async function page({searchParams}) {
 
   return (
     <>
+     
       <MapWrapper
         paramLoc={searchURLParams.cod}
         year={searchURLParams.year}

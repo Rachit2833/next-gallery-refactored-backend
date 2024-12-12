@@ -17,16 +17,18 @@ import AlbumGrid from "../_MyComponents/AlbumsComponent/AlbumGrid";
 import AlbumLoaders from "../_MyComponents/Loaders/AlbumLoaders";
 import AlbumFilter from "../_MyComponents/AlbumsComponent/AlbumFilter";
 import AddAlbumForm from "../_MyComponents/AlbumsComponent/AddAlbumForm";
+import SideFilterLayout from "../_MyComponents/SideFilterLayout";
 
  async function page({searchParams}) {
   const query = await searchParams
    return (
      <>
-          <Suspense fallback={<AlbumLoaders />}>
-                <AlbumGrid year={query.year} />
-          </Suspense>
-     
-
+       <div className="flex items-center">
+         <SideFilterLayout year={query.year} />
+       </div>
+       <Suspense fallback={<AlbumLoaders />}>
+         <AlbumGrid year={query.year} />
+       </Suspense>
      </>
    );
 }

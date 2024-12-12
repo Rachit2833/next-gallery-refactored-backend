@@ -5,7 +5,7 @@ async function PeopleImage({ name }) {
    console.log(res,"fss");
 
    return (
-      <div className="grid md:grid-cols-3 grid-cols-2 gap-4 md:gap-0">
+      <div className="grid md:grid-cols-3 grid-cols-2 gap-4">
 
 
          {

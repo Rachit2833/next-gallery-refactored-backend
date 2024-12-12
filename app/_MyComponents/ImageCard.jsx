@@ -1,5 +1,8 @@
 "use client"
 import img from "@/app/dune.jpg";
+import imgs from "@/app/c.jpg";
+import imgs2 from "@/app/arc.jpg";
+import imgs3 from "@/app/abc.jpg";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { CardDescription } from "@/components/ui/card";
@@ -17,8 +20,7 @@ import { useFormStatus } from 'react-dom';
 import { deleteImagesAction, updateFavourite } from "../_lib/actions";
 import { useUser } from "../_lib/context";
 import { Check, Star } from "lucide-react";
-function ImageCard({ image}) {
-   console.log(image,"image");
+function ImageCard({ image,text}) {
    const currentPath = usePathname(); 
    const { setIsImageOpen } = useUser();
    const searchParams= useSearchParams()
@@ -76,7 +78,7 @@ function ImageCard({ image}) {
             <ContextMenuTrigger>
                <div className="overflow-y-auto max-h-24 mt-2">
                   <CardDescription>Arrakis</CardDescription>
-                  <p className="heading">Whereas recognition</p>
+                  <p className="heading">Whereas recognition {text}</p>
                   <div className="text-xs  text-gray-500 mt-4 sm:block hidden">
                      <p> By{" "}
                         <span className="font-semibold hover:cursor-pointer">
@@ -124,11 +126,11 @@ function ImageCard({ image}) {
 }
 
 export default ImageCard;
-export function Deletebutton() {
+export function Deletebutton({text}) {
    const { pending } = useFormStatus()
    return (
          <>
-         <Button type="submit" disabled={pending} >Continue</Button>
+         <Button type="submit" disabled={pending} >{"Continue"|| text} </Button>
          
          </>
    )

@@ -12,7 +12,7 @@ function MainSlide({ searchYear,card}) {
    return (
 <>
 
-            <Card x-chunk="dashboard-06-chunk-0">
+            <Card x-chunk="dashboard-06-chunk-0" className="min-h-[85vh] relative">
                <CardHeader>
                   <CardTitle>Your Saved Images</CardTitle>
                   <CardDescription>
@@ -26,11 +26,6 @@ function MainSlide({ searchYear,card}) {
                   </Suspense>
                    
                </CardContent>
-               <CardFooter>
-                  <div className="text-xs text-muted-foreground">
-                     Showing <strong>20</strong> of <strong>20</strong> photos
-                  </div>
-               </CardFooter>
             </Card>
       </>  
 

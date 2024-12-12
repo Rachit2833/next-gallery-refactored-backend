@@ -1,6 +1,7 @@
 "use client";
 import imgs from "@/app/dune.jpg";
 import { CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 function getSeason() {
@@ -24,11 +25,11 @@ function Uploadcard({ img }) {
    const [location, setLocation] = useState("Arrakis");
    const descriptionPlaceholder = getSeason();
    const handleLocationBlur = (e) => {
-      setLocation(e.target.innerText); // Update the state with innerText
+      setLocation(e.target.value); // Update the state with value
    };
 
    const handleDescriptionBlur = (e) => {
-      setDescription(e.target.innerText); // Update the state with innerText
+      setDescription(e.target.value); // Update the state with innerText
    };
 
    return (
@@ -42,26 +43,22 @@ function Uploadcard({ img }) {
                className="w-full  h-[15rem] object-cover rounded-t-lg"
             />
          </div>
-         <div className="overflow-y-auto max-h-24 mt-2">
+         <div className=" max-h-24 mt-2">
             {/* Make location editable */}
-            <CardDescription
-               contentEditable
-               onBlur={handleLocationBlur} // Use onBlur for location
-               className="cursor-pointer"
-               suppressContentEditableWarning={true} // Prevent React warning
-            >
-               {location ||"Beautiful World"}
-            </CardDescription>
+            <Input
+               className=" h-4 border-none my-2 aria-selected:border-none "
+               name="LocationName"
+               onChange={handleLocationBlur}
+               value={ location }
+             />
+            <Input
+               name="Description"
+               onChange={handleDescriptionBlur}
+               className="heading cursor-pointer h-8 !text-[1.25rem]" // Equivalent to 2.25rem
+               value={description}
+            />
+               
 
-            {/* Make description editable */}
-            <CardDescription
-               contentEditable
-               onBlur={handleDescriptionBlur} // Use onBlur for description
-               className="heading cursor-pointer"
-               suppressContentEditableWarning={true} // Prevent React warning
-            >
-               {description || descriptionPlaceholder}
-            </CardDescription>
 
             <div className="text-xs text-gray-500 mt-4 sm:block hidden">
                By{" "}
