@@ -59,7 +59,6 @@ async function getAllCountries(req, res) {
         $group: {
           _id: {
             country: "$Country",
-            locationName: "$Location.name",
           },
           numImages: { $sum: 1 },
         },

@@ -1,4 +1,5 @@
 const express = require("express")
+
 const { getAllAlbum, addNewAlbum, addImageToAlbum, getAlbumById, deleteAlbum, getAlbumImages } = require("../controller/albumController")
 const { searchThrottle } = require("../middleware/imageMiddleWare")
 const router= express.Router()
