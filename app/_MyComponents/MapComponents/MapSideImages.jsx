@@ -1,7 +1,14 @@
+import { cookies } from "next/headers"
 import ImageCard from "../ImageCard"
 
 async function MapSideImages({search}) {
-    let res = await fetch(`http://localhost:2833/image/loc?cod=${search}`)
+   const cookieStore = cookies()
+    let res = await fetch(`http://localhost:2833/image/loc?cod=${search}`,{
+       headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${cookieStore.get("session").value}`,
+       },
+    })
      let data = await res.json()
 
 

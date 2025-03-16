@@ -23,7 +23,7 @@ function AlbumCard({item}) {
    }
    async function submitDeleteForm(formData){
       await deleteAlbumAction(formData)
-      searchParams(false)
+      setIsOpen(false)
    }
    return (
       <Card className="relative min-h-[20rem] sm:min-h-[24rem] lg:min-h-[30rem]">

@@ -4,13 +4,20 @@ import Image from "next/image"
 import CountryCard from "./CountryCard"
 import { Countries } from "@/app/_lib/countries"
 import Paris from "./paris.jpg"
+import { cookies } from "next/headers"
 function getCountryCodeByName(countryName) {
    const entries = Object.entries(Countries);
    const found = entries.find(([, name]) => name === countryName);
    return found ? found[0] : null; // Return the code or null if not found
 }
 async function MapSideOption({year,yearRange}) {
-   const data = await fetch(`http://localhost:2833/stats/countries?year=${year}&yearRange=${yearRange}`)
+   const cookieStore = await cookies()
+   const data = await fetch(`http://localhost:2833/stats/countries?year=${year}&yearRange=${yearRange}`,{
+      headers: {
+         "Content-Type": "application/json",
+         authorization: `Bearer ${cookieStore.get("session").value}`,
+      },
+   })
    const resData = await data.json()
    const favouriteCountry =  resData.favouriteCountry[0]._id 
    const favouriteLocation = resData.favouriteLocation[0]._id.locationName

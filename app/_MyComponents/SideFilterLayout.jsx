@@ -7,7 +7,8 @@ import DrawerClick from "./DrawerClick"
 import Filter from "./Filter"
 import { usePathname } from "next/navigation"
 
-function SideFilterLayout({year}) {
+function SideFilterLayout({year,text,formType}) {
+
    const pathname = usePathname()
    const filterArray = [
       { label: "All", value: "All" },
@@ -17,7 +18,9 @@ function SideFilterLayout({year}) {
    ];
    return (
       <>
-         {pathname !== "/memory-map" && pathname !=="/post" ? <><Filter
+         {pathname !== "/memory-map" && pathname !=="/post" ?
+          <>
+          <Filter
             paramName="year"
             values={filterArray}
             defaultValue="All"
@@ -55,7 +58,7 @@ function SideFilterLayout({year}) {
                      Download
                   </span>
                </Button>
-               <DrawerClick name={"Add Images"} />
+               <DrawerClick name={text} formType={formType} />
             </div></> :null}
       </>
    )

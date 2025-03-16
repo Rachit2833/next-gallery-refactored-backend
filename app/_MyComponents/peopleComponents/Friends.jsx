@@ -32,7 +32,7 @@ function Friends({children}) {
 
    return (
       <>
-         <div className="flex justify-between mx-4 my-8">
+         <div className={`flex justify-between mx-4 my-8`}>
             <h1>People</h1>
             <button onClick={toggleExpand} className="text-blue-500 hover:underline">
                {isExpanded ? "View Less" : "View All"}

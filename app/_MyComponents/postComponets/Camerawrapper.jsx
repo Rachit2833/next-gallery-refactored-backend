@@ -1,7 +1,8 @@
 "use client"
 
 import dynamic from "next/dynamic";
-const CameraUi = dynamic(() => import("./CameraUi"), { ssr: false });
+import CameraUi from "./CameraUi";
+
 
 function Camerawrapper() {
    return (

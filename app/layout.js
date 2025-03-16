@@ -11,8 +11,9 @@ import Filter from "./_MyComponents/Filter";
 import NavBar from "./_MyComponents/NavBar";
 import SideFilterLayout from "./_MyComponents/SideFilterLayout";
 import { UserProvider } from "./_lib/context";
+import { cookies } from "next/headers";
 export default async function RootLayout({ children, path }) {
- 
+
   const filterArray = [
     { label: "All", value: "All" },
     { label: "2024", value: 2024 },
@@ -38,7 +39,7 @@ export default async function RootLayout({ children, path }) {
       </head>
       <body>
         <UserProvider>
-          <ImageModel />
+          <ImageModel  />
 
           <div className="flex min-h-screen w-full flex-col bg-muted/40">
             <NavBar />

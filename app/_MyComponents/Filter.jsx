@@ -6,12 +6,14 @@ import { useEffect, useState } from "react";
 
 
 function Filter({values,paramName,defaultValue,year}) {
+   console.log(year, "Dgi", !year);
    const searchParams = useSearchParams()
    const pathname = usePathname()
    const router = useRouter()
    const [activeFilter,setActiveFilter]=useState(year||defaultValue)
    useEffect(()=>{
      if(!year){
+
         handleParams("All")
      }
    },[])

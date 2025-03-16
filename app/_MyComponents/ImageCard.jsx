@@ -1,8 +1,5 @@
 "use client"
 import img from "@/app/dune.jpg";
-import imgs from "@/app/c.jpg";
-import imgs2 from "@/app/arc.jpg";
-import imgs3 from "@/app/abc.jpg";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { CardDescription } from "@/components/ui/card";
@@ -13,26 +10,22 @@ import {
    ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { saveAs } from 'file-saver';
+import { Check, CheckIcon, Plus } from "lucide-react";
 import Image from "next/image";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useRef, useState } from "react";
 import { useFormStatus } from 'react-dom';
 import { deleteImagesAction, updateFavourite } from "../_lib/actions";
 import { useUser } from "../_lib/context";
-import { Check, Star } from "lucide-react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+
 function ImageCard({ image,text}) {
+   const cardRef = useRef(null);
+  
+   const [selectedImages,setSelectedImages]=useState([])
    const currentPath = usePathname(); 
-   const { setIsImageOpen } = useUser();
-   const searchParams= useSearchParams()
-   const router = useRouter()
-   const pathname = usePathname()
-   const [isLoading, setIsLoading] = useState(false)
-   function handleParams(filter) {
-      if (!searchParams) return; 
-      const params = new URLSearchParams(searchParams);
-      params.set("img_id", filter);
-      router.replace(`${pathname}?${params}`, { scroll: false });
-   }
+   const { setIsImageOpen ,modelImages, setModelImages} = useUser();
    function logTimeDifference(dateString) {
       const now = new Date(); // Current date and time
       const pastDate = new Date(dateString); // Date to compare with
@@ -61,13 +54,24 @@ function ImageCard({ image,text}) {
    }
 
    return (
-      <div className={`mx-auto ${image.Favourite ? "bg-[#e3d380]" : "bg-white"} rounded-lg shadow-md p-4 w-full max-w-xs lg:max-w-sm`}>
+      <div onDoubleClick = {
+         () => {
+            if(selectedImages.includes(image._id)) {
+         setSelectedImages(selectedImages.filter((id) => id !== image._id));
+      } else {
+      setSelectedImages([...selectedImages, image._id]);
+   }
+         }} ref={cardRef} className={` transition-colors duration-100 ease-in-out mx-auto relative ${image?.Favourite ? "bg-[#e3d380]" : "bg-white"} ${selectedImages.includes(image._id) ? "border-[#4169e1] border-4" :null } rounded-lg shadow-md p-4 w-full max-w-xs lg:max-w-sm`}>
+         {selectedImages.includes(image._id) ?<Button className={`absolute top-[-1rem] rounded-full h-8 w-8 p-0 m-0 ${selectedImages.includes(image._id) ? "bg-white border-[#4169e1] text-[#4169e1] border-4" : "bg-transparent border-black border-2 "} text-black   z-10 font-[2rem] hover:bg-white right-[-1rem]`}>{selectedImages.includes(image._id) ? <CheckIcon /> : <Plus />}</Button>:null}
          <div
             className="relative w-full h-[15rem] bg-gray-200 rounded-t-lg cursor-pointer overflow-hidden"
-            onClick={() => setIsImageOpen(true)} 
+            onClick={() => {setIsImageOpen(true)
+               setModelImages(image?.ImageUrl)}
+            } 
+            
          > 
             <Image
-               src={img}
+               src={image?.ImageUrl==="https://example.com/image1.jpg" || !image?.ImageUrl? img:image?.ImageUrl}
                alt="Placeholder"
                layout="fill"
                objectFit="cover"
@@ -77,8 +81,8 @@ function ImageCard({ image,text}) {
          <ContextMenu>
             <ContextMenuTrigger>
                <div className="overflow-y-auto max-h-24 mt-2">
-                  <CardDescription>Arrakis</CardDescription>
-                  <p className="heading">Whereas recognition {text}</p>
+                  <CardDescription>{image?.Location?.name}</CardDescription>
+                  <p className="heading">{image?.Description}</p>
                   <div className="text-xs  text-gray-500 mt-4 sm:block hidden">
                      <p> By{" "}
                         <span className="font-semibold hover:cursor-pointer">
@@ -106,7 +110,7 @@ function ImageCard({ image,text}) {
                            </AlertDialogHeader>
                            <AlertDialogFooter>
                            <form  action={deleteImagesAction} >
-                              <input type="hidden" value={image._id} name="imageId"  />
+                              <input type="hidden" value={image?._id} name="imageId"  />
                               <AlertDialogCancel className=" mx-2">Cancel</AlertDialogCancel>
                               <Deletebutton />
                            </form>
@@ -114,9 +118,9 @@ function ImageCard({ image,text}) {
                         </AlertDialogContent>
                      </AlertDialog>
                   <form action={updateFavourite} >
-                     <input type="hidden" value={image._id} name="imageId" /> 
-                     <input type="hidden" value={image.Favourite} name="favValue" /> 
-                     <ContextMenuItem><button className=" flex justify-end align-middle" type="submit">Favourite {image.Favourite ? <span className=" ml-4"><Check /></span> : null}</button></ContextMenuItem>
+                     <input type="hidden" value={image?._id} name="imageId" /> 
+                     <input type="hidden" value={image?.Favourite} name="favValue" /> 
+                     <ContextMenuItem><button className=" flex justify-end align-middle" type="submit">Favourite {image?.Favourite ? <span className=" ml-4"><Check /></span> : null}</button></ContextMenuItem>
                   </form>
                </ContextMenuContent>
             </ContextMenuTrigger>
@@ -130,7 +134,7 @@ export function Deletebutton({text}) {
    const { pending } = useFormStatus()
    return (
          <>
-         <Button type="submit" disabled={pending} >{"Continue"|| text} </Button>
+         <Button type="submit" disabled={pending} >{text || "Continue"} </Button>
          
          </>
    )

@@ -2,15 +2,21 @@
 import { usePathname } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import Link from "next/link";
-import { Album, Camera, Heart, Home, Map, Settings, Users, } from "lucide-react";
+import { Album, Camera, Heart, Home, Map, Search, Settings, Users, } from "lucide-react";
 
 function NavBar() {
-
+   const pathname = usePathname();
+   
    const navigationItems = [
       {
          name: "Albums",
          icon: Album, // Directly reference the icon component
          href: "/albums",
+      },
+      {
+         name: "Friends",
+         icon: Search, // Directly reference the icon component
+         href: "/friends",
       },
       {
          name: "People & Sharing",
@@ -36,13 +42,13 @@ function NavBar() {
 
    const currentPath = usePathname(); // Get current route
    return (
-      <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+      pathname === "/login" || pathname === "/sign-up" ? null : <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
          <nav className="flex flex-col items-center gap-4 px-2 py-4">
             <Link
                href="/"
                className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full ${currentPath === "/"
-                     ? "bg-primary text-white" // Active styles
-                     : "bg-transparent text-black" // Non-active styles
+                  ? "bg-primary text-white" // Active styles
+                  : "bg-transparent text-black" // Non-active styles
                   } text-lg font-semibold md:h-8 md:w-8 md:text-base`}
             >
                <Home className="h-4 w-4 transition-all group-hover:scale-110" />
@@ -56,9 +62,9 @@ function NavBar() {
                         <TooltipTrigger asChild>
                            <Link
                               href={item.href}
-                              className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full ${`/${currentPath.split("/")[1]}`=== item.href
-                                    ? "bg-primary text-white" // Active styles
-                                    : "bg-transparent text-black" // Non-active styles
+                              className={`group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full ${`/${currentPath.split("/")[1]}` === item.href
+                                 ? "bg-primary text-white" // Active styles
+                                 : "bg-transparent text-black" // Non-active styles
                                  } text-lg font-semibold md:h-8 md:w-8 md:text-base`}
                            >
                               <item.icon className="h-4 w-4 transition-all group-hover:scale-110" />

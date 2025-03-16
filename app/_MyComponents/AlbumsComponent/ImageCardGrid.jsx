@@ -1,12 +1,15 @@
-import Image from "next/image";
 import PasteCards from "./PasteCards";
-
-import { Button } from "@/components/ui/button";
+import { cookies } from "next/headers";
 import NoImagesDoodle from "../NoImagesDoodle";
 async function ImageCardGrid({id,year}) {
-      let res = await fetch(`http://localhost:2833/album/images/${id}?year=${year||"all"}`);
+   const cookieStore= await cookies()
+      let res = await fetch(`http://localhost:2833/album/images/${id}?year=${year||"all"}`,{
+         headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${cookieStore.get("session").value}`,
+         },
+      });
       res = await res.json()
-   console.log(res?.data?.Images.length,"sfsf");
    return (
       <>
          {res?.data?.Images.length !== 0 ? <PasteCards res={res?.data?.Images} /> :<NoImagesDoodle /> }

@@ -23,7 +23,7 @@ async function page({ params ,searchParams }) {
   return (
     <>
       <div className="flex items-center">
-        <SideFilterLayout year={year} />
+        <SideFilterLayout formType="img" year={year} />
       </div>
       <Card className="h-[85vh]" x-chunk="dashboard-06-chunk-0 ">
         <CardHeader>

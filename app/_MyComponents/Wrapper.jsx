@@ -1,36 +1,28 @@
 "use client"
-
-import { Download, ListFilter } from "lucide-react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import DrawerClick from "./DrawerClick"
+import * as faceapi from "@vladmandic/face-api"
 import MainSlide from "./MainSlide"
 import SideFilterLayout from "./SideFilterLayout"
-
 function Wrapper({ card, searchYear }) {
+  
+   const faceRecognizer = async () => {
+      await faceapi.nets.tinyFaceDetector.loadFromUri('/weights');
+      await faceapi.nets.faceLandmark68Net.loadFromUri('/weights');
+      await faceapi.nets.faceRecognitionNet.loadFromUri('/weights');
+      await faceapi.nets.faceExpressionNet.loadFromUri('/weights');
+      await faceapi.nets.ssdMobilenetv1.loadFromUri('/weights');
+   };
 
-   const searchParams = useSearchParams()
-   const pathname= usePathname()
-   const router = useRouter()
-    function handleParams(filter) {
-       if (!searchParams) return; // Ensure searchParams are loaded
-
-       const params = new URLSearchParams(searchParams);
-       params.set("year", filter);
-
-       router.replace(`${pathname}?${params}`, { scroll: false });
-    }
-
+   faceRecognizer()
    return (
-     
         <>
          <div className="flex items-center">
 
-            <SideFilterLayout year={searchYear} />
+            <SideFilterLayout text="Add Images" year={searchYear} />
          </div>
          <MainSlide searchYear={searchYear} card={card}  />
+       
+
          </>
-
-
    )
 }
 

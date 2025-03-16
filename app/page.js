@@ -1,7 +1,7 @@
-import { Suspense } from "react";
+
 import Wrapper from "./_MyComponents/Wrapper";
 import ImagesGrid from "./_MyComponents/ImagesGrid";
-import RootLayout from "./layout";
+
 
 
 

@@ -16,11 +16,11 @@ import { Label } from "@/components/ui/label";
 import { PlusCircle } from "lucide-react";
 import { useState, useTransition } from "react";
 
-function AddAlbumForm({ name }) {
-   const [isOpen, setIsOpen] = useState(false);
+function AddAlbumForm({setIsOpen, }) {
    const [isPending, startTransition] = useTransition();
 
    async function handleSubmit(formData) {
+      console.log("hello world");
       // Using `startTransition` to ensure state updates after server action
       await createNewAlbum(formData); // Call the server action with formData
       startTransition(() => {
@@ -30,15 +30,13 @@ function AddAlbumForm({ name }) {
    }
 
    return (
-      <div>
-         <Drawer open={isOpen} onOpenChange={setIsOpen}>
-            <DrawerTrigger
-               onClick={() => setIsOpen(true)}
-               className="h-7 px-3 text-xs gap-1 bg-primary text-primary-foreground shadow hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-            >
-               <PlusCircle className="h-3.5 w-3.5" />
-               {name}
-            </DrawerTrigger>
+
+      <div className="w-[80%] lg:w-[40%] mx-auto">
+         <DrawerHeader >
+            <DrawerTitle className="text-center">Select Images from your Local Storage</DrawerTitle>
+            <DrawerDescription className="text-center">Description and Location can be Editable from the Input Fields Below</DrawerDescription>
+         </DrawerHeader>
+         <DrawerFooter>
             <DrawerContent>
                <div className="w-[80%] lg:w-[40%] mx-auto">
                   <DrawerHeader>
@@ -93,7 +91,7 @@ function AddAlbumForm({ name }) {
                   </DrawerFooter>
                </div>
             </DrawerContent>
-         </Drawer>
+         </DrawerFooter>
       </div>
    );
 }

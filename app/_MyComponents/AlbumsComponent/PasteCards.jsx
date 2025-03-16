@@ -4,6 +4,7 @@ import ImageCard from "../ImageCard";
 import Uploadcard from "../UploadCard";
 import { useUser } from "@/app/_lib/context";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import PasteCardDummy from "../PasteCardDummy";
 
 function PasteCards({res,cod,frId,query}) {
    const router = useRouter();
@@ -65,14 +66,15 @@ function PasteCards({res,cod,frId,query}) {
    }, [handlePaste]);
    return (
       <div className="grid md:grid-cols-3 grid-cols-2 gap-4 ">
-         {images?.map((item, index) => (
-            <Uploadcard key={index} img={item.imageUrl} />
-         ))}
+        
 
          {cod && searchData ? searchData?.LocationData[0]?.data.map((item, index)=>(
-            <ImageCard key={index} image={item} text={"From Search "} />
+            <ImageCard key={index} image={item}  />
          )) : res?.map((item, index) => (
             <ImageCard key={index} image={item} />
+         ))}
+         {images?.map((item, index) => (
+            <PasteCardDummy key={index} img={item.imageUrl} />
          ))}
 
       </div>

@@ -1,35 +1,35 @@
 "use client"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { Alert, AlertDescription, AlertTitle, } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
+import { Breadcrumb, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import { Card, CardTitle } from "@/components/ui/card"
 import {
    DropdownMenu,
-   DropdownMenuCheckboxItem,
    DropdownMenuContent,
    DropdownMenuItem,
    DropdownMenuLabel,
    DropdownMenuSeparator,
-   DropdownMenuTrigger,
+   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { AwardIcon, ImageIcon } from "lucide-react"
-import { Separator } from "@/components/ui/separator"
-import {Alert,AlertDescription,AlertTitle,} from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Cross, Home, LineChart, Package, Package2, PanelLeft, Search, ShoppingCart, Users2 } from "lucide-react"
+import { Home, ImageIcon, LineChart, Package, Package2, PanelLeft, Search, ShoppingCart, Users2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import BreadCrums from "./BreadCrumb"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import React, { useEffect, useState } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardTitle } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import SearchLoader from "./Loaders/SearchLoader"
 import { useUser } from "../_lib/context"
+import BreadCrums from "./BreadCrumb"
+import SearchLoader from "./Loaders/SearchLoader"
+import { logOutUser } from "../_lib/actions"
 function SideSheet() {
    const { searchVal, setSearchVaL, searchData, setSearchData,  queryState, } =useUser()
    const [isLoading, setIsLoading] = useState(false)
    const pathName = usePathname()
+
    const pathArray = pathName.split("/")
    const searchParams = useSearchParams()
    const router = useRouter()
@@ -56,8 +56,8 @@ function SideSheet() {
       search()
    }, [searchVal],)
    return (
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-         <Sheet>
+      pathName !== "/login" && pathName !== "/sign-up" ?<header className = "sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+         <Sheet >
 
             <SheetTrigger asChild>
                <Button size="icon" variant="outline" className="sm:hidden">
@@ -162,7 +162,14 @@ function SideSheet() {
                      <DropdownMenuItem>Settings</DropdownMenuItem>
                      <DropdownMenuItem>Support</DropdownMenuItem>
                      <DropdownMenuSeparator />
-                     <DropdownMenuItem>Logout</DropdownMenuItem>
+                    <form className="p-0 m-0" action={async()=>{
+                
+                     await logOutUser()
+                     router.push("/login")
+                     router
+                    }}>
+                        <button type="submit"><DropdownMenuItem >Logout</DropdownMenuItem></button>
+                    </form>
                   </DropdownMenuContent>
                </DropdownMenu>
             </div>
@@ -216,7 +223,7 @@ function SideSheet() {
 
 
          </div>
-      </header>
+      </header >:null
    )
 }
 

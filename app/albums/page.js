@@ -1,22 +1,7 @@
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, ListFilter } from "lucide-react";
-import AlbumCard from "../_MyComponents/AlbumsComponent/AlbumCard";
-import DrawerClick from "../_MyComponents/DrawerClick";
 import { Suspense } from "react";
 import AlbumGrid from "../_MyComponents/AlbumsComponent/AlbumGrid";
 import AlbumLoaders from "../_MyComponents/Loaders/AlbumLoaders";
-import AlbumFilter from "../_MyComponents/AlbumsComponent/AlbumFilter";
-import AddAlbumForm from "../_MyComponents/AlbumsComponent/AddAlbumForm";
 import SideFilterLayout from "../_MyComponents/SideFilterLayout";
 
  async function page({searchParams}) {
@@ -24,7 +9,7 @@ import SideFilterLayout from "../_MyComponents/SideFilterLayout";
    return (
      <>
        <div className="flex items-center">
-         <SideFilterLayout year={query.year} />
+         <SideFilterLayout formType="Album" text="Add Album" year={query.year} />
        </div>
        <Suspense fallback={<AlbumLoaders />}>
          <AlbumGrid year={query.year} />

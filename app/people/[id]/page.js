@@ -1,27 +1,15 @@
 
-import DrawerClick from "@/app/_MyComponents/DrawerClick";
-import ImageDetect from "@/app/_MyComponents/ImageDetect";
 import ImageLoader from "@/app/_MyComponents/Loaders/ImageLoader";
 import PeopleImage from "@/app/_MyComponents/peopleComponents/PeopleImage";
 import SideProfile from "@/app/_MyComponents/peopleComponents/SideProfile";
 import SideFilterLayout from "@/app/_MyComponents/SideFilterLayout";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, ListFilter } from "lucide-react";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 
 
@@ -30,8 +18,14 @@ import { Suspense } from "react";
 
 async function page({params,searchParams}) {
   const param = await params
+  const cookieStore = await cookies()
   const searchParamValue = await searchParams
-   const res = await fetch(`http://localhost:2833/label/${param.id}`);
+   const res = await fetch(`http://localhost:2833/label/${param.id}`, {
+     headers: {
+       "Content-Type": "application/json",
+       authorization: `Bearer ${cookieStore.get("session").value}`,
+     },
+   });
    const newRes= await res.json()
   return (
     <>

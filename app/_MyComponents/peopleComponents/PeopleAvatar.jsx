@@ -3,8 +3,15 @@ import { AvatarFallback, } from "@radix-ui/react-avatar";
 import Image from "next/image";
 import image2 from "@/app/image3.jpeg";
 import Link from "next/link";
+import { cookies } from "next/headers";
 async function PeopleAvatar() {
-   const response = await fetch("http://localhost:2833/labels");
+   const cookieStore = await cookies()
+   const response = await fetch("http://localhost:2833/labels",{
+      headers: {
+         "Content-Type": "application/json",
+         authorization: `Bearer ${cookieStore.get("session").value}`,
+      },
+   });
    const people = await response.json();
    return (
       <>

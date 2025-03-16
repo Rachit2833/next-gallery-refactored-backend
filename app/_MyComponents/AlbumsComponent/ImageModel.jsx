@@ -5,7 +5,7 @@ import { AspectRatio } from "@radix-ui/react-aspect-ratio"
 import image1 from "@/app/dune.jpg"
 import Image from "next/image"
 function ImageModel() {
-   const { isImageOpen, setIsImageOpen } = useUser()
+   const { isImageOpen, setIsImageOpen, modelImages, setModelImages, } = useUser()
    return (
    
       <>
@@ -23,7 +23,7 @@ function ImageModel() {
                {/* Image in Modal */}
                <AspectRatio ratio={16 / 9} className=" sm:block hidden relative w-full h-full">
                   <Image
-                     src={image1}
+                     src={modelImages||image1}
                      alt="Dune"
                      layout="fill"
                      objectFit="cover"
