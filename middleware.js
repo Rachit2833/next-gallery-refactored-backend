@@ -27,7 +27,7 @@ export async function middleware(req) {
     }
 
     const data = await authResponse.json();
-    console.log("Token Verified:", data);
+
     if(pathname==="/sign-up"||pathname==="/login"&& token){
       return NextResponse.redirect(new URL("/", req.url));
 
