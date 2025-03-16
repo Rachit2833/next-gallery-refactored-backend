@@ -1,15 +1,55 @@
 const mongoose  = require("mongoose");
 const Image = require("../Schema/imageSchema");
+const Label = require("../Schema/labelSchema");
+const multer = require("multer");
+const uploadFile = require("../upload");
+const { json } = require("body-parser");
 
+
+const storage = multer.memoryStorage();
+const fileFilter = (req, file, cb) => {
+if (file.mimetype.startsWith("image/") || file.mimetype.startsWith("video/")) {
+  cb(null, true);
+} else {
+  cb(new Error("Only images and videos are allowed!"), false); // Reject the file
+}
+};
+const upload = multer({
+  storage,
+  fileFilter:fileFilter
+})
+const upFun= upload.single("photo");
+async function test2(req,res ,next) {
+     console.log(req.body,"sdssas");
+     next()
+}
+async function uploadToStorage(req, res, next) {
+  try {
+    if (!req.file) {
+      throw new Error("No File upload failed");
+    }
+    console.log(req.body," bmnm");
+    const extension = req.file.mimetype.split('/')[1]
+    const fileBuffer = req.file.buffer;
+    const originalName = `Rachit2833-${Date.now()}.${extension}`
+    const {data ,error}=  await uploadFile(
+      originalName,
+      fileBuffer,
+      req.file.mimetype
+    );
+    (req.body.ImageUrl = `https://hwhyqxktgvimgzmlhecg.supabase.co/storage/v1/object/public/Images2.0/${originalName}`),
+      next();
+  } catch (error) {
+    next(error);
+  }
+}
 async function getAllImages(req, res) {
   try {
-    // Extract the query parameters and remove reserved ones like sort, page, limit, and fields
     const query = { ...req.query };
     const reservedNames = ["sort", "page", "limit", "fields"];
     reservedNames.forEach((param) => delete query[param]);
     const filter = {};
-    // Handle the 'year' filter
-    if (query.year && query.year.toLowerCase() !== "all") {
+    if (query.year && query.year?.toLowerCase() !== "all") {
       const year = parseInt(query.year, 10);
       if (!isNaN(year)) {
         const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`);
@@ -18,15 +58,15 @@ async function getAllImages(req, res) {
       }
       delete query.year;
     }
-    if (query.cod) {
-      filter.Location = { $regex: query.cod, $options: "i" };
-      delete query.cod;
-    }
-    if (query.friendId){
-       let id = new mongoose.Types.ObjectId(String(req.query.friendId)); 
-       filter.People={ $eq:id}
-       delete query.friendId;
+   if (query.cod?.toLowerCase() !== "all"&&query.cod) {
+     filter["Location.name"] = { $regex: query.cod, $options: "i" };
+     delete query.cod;
+   }
+    if (query.frId){
+       let id = new mongoose.Types.ObjectId(String(req.query.frId)); 
+       filter["People.id"]={ $eq:id}
     } 
+    delete query.frId;
     const images = await Image.find(filter).populate("People");
     return res.status(200).json({ images });
   } catch (error) {
@@ -40,7 +80,8 @@ async function getAllImages(req, res) {
 
 async function addNewImage(req, res) {
   try {
-    const newImage = new Image(req.body); // Use req.body instead of req.data
+    req.body.Location = JSON.parse(req.body.Location);
+    const newImage = new Image(req.body); 
     const image = await newImage.save();
     console.log(image);
     res.status(200).json({
@@ -56,7 +97,6 @@ async function addNewImage(req, res) {
   }
 }
 async function getAllImagesForLocation(req, res) {
-  // Copy query parameters, except reserved ones
   const query = { ...req.query };
   const reservedNames = ["sort", "page", "limit", "fields"];
   reservedNames.forEach((el) => {
@@ -176,8 +216,106 @@ async function setAndUnsetFavourite(req,res) {
     });
   }
 }
+async function searchImages(req,res) {
+  const query = req.query.query;
+    try {
+      const LocationData = await Image.aggregate(
+        [
+          {
+            $search: {
+              index: "default3",
+              autocomplete: {
+                query,
+                path: "Location.name",
+              },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              Location: {
+                $addToSet: "$Location.name",
+              },
+              data: {
+                $push: {
+                  _id: "$_id",
+                  ImageUrl: "$ImageUrl",
+                  Country: "$Country",
+                  Favourite: "$Favourite",
+                  Location: "$Location",
+                  Description: "$Description",
+                  People: "$People",
+                  Date: "$Date",
+                  __v: "$__v",
+                },
+              },
+            },
+          },
+        ],
+        { maxTimeMS: 60000, allowDiskUse: true }
+      );
+      const DesData = await Image.aggregate(
+        [
+          {
+            $search: {
+              index: "Description",
+              autocomplete: {
+                query,
+                path: "Description",
+              },
+            },
+          },
+        ],
+        { maxTimeMS: 60000, allowDiskUse: true }
+      );
+       const peopleData = await Label.aggregate(
+         [
+           {
+             $search: {
+               index: "People",
+               autocomplete: {
+                 query: query,
+                 path: "label",
+               },
+             },
+           },
+           {
+             $project: {
+               descriptors: 0,
+             },
+           },
+         ],
+         { maxTimeMS: 60000, allowDiskUse: true }
+       );
+      res.status(200).json({
+        message: "Success",
+        DesData,
+        LocationData,
+        peopleData
+      });
+     
+    } catch (error) {
+       res.status(400).json({
+         message: "Something Went Wrong",
+       });
+    }
+}
 
 
 
-module.exports = { setAndUnsetFavourite,addNewImage,deleteImage, getAllImages,getImageById, test, getAllImagesForLocation , getAllLocations };
+module.exports = {
+  upFun,
+  uploadToStorage,
+  searchImages,
+  setAndUnsetFavourite,
+  addNewImage,
+  deleteImage,
+  getAllImages,
+  getImageById,
+  test2,
+  test,
+  getAllImagesForLocation,
+  getAllLocations,
+  
+};
 
