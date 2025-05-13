@@ -1,5 +1,6 @@
 const  mongoose  = require("mongoose");
 const Album = require("../Schema/albumSchema");
+const SharedLink = require("../Schema/sharedLink");
 
 
 async function getAllAlbum(req, res) {
@@ -28,7 +29,7 @@ async function getAllAlbum(req, res) {
   }
 }
 async function addNewAlbum(req, res) {
-  
+
   try {
     const newAlbum = new Album(req.body); // Use req.body instead of req.data
     const album = await newAlbum.save();
@@ -43,23 +44,95 @@ async function addNewAlbum(req, res) {
     });
   }
 }
-async function addImageToAlbum(req,res) {
-  const id = req.body.id
-  const photoIds =req.body.photoArray
-  const data = await Album.updateOne(
-    { _id: id },
-    { $push: { Images: { $each: photoIds } }, updatedAt: new Date() }
-  );
-  res.status(200).json({
-    message: "Album Saved",
-    data: data,
-  });
+
+async function addImageToAlbum(req, res) {
+  try {
+    console.log(1);
+    const albumId = new mongoose.Types.ObjectId(req.params.id);
+    const { photoArray } = req.body;
+    console.log(2);
+
+    if (!photoArray || !Array.isArray(photoArray) || photoArray.length === 0) {
+      console.log(3);
+      return res.status(400).json({ message: "Invalid or empty image array" });
+    }
+    console.log(4);
+
+    const album = await Album.findById(albumId);
+    console.log(5);
+    if (!album) {
+      console.log(6);
+      return res.status(404).json({ message: "Album not found" });
+    }
+    console.log(7);
+
+    const existingImages = new Set(album.Images.map((id) => id.toString())); // Convert existing images to Set for quick lookup
+    const newImages = [];
+    const duplicateImages = [];
+    console.log(8);
+    console.log("Received photoArray:", photoArray);
+
+    // Filter out invalid and duplicate images
+    photoArray.forEach((photoId) => {
+      console.log("Processing:", photoId);
+      const photoStr = String(photoId);
+
+      // Validate ObjectId format
+      if (!mongoose.Types.ObjectId.isValid(photoStr)) {
+        console.log("Invalid ObjectId:", photoStr);
+        return;
+      }
+
+      if (existingImages.has(photoStr)) {
+        console.log("Duplicate image found:", photoStr);
+        duplicateImages.push(photoStr);
+      } else {
+        console.log("Adding new image:", photoStr);
+        newImages.push(new mongoose.Types.ObjectId(photoStr));
+      }
+    });
+
+    console.log(9);
+
+    // If no new images, return early with a duplicate warning
+    if (newImages.length === 0) {
+      console.log(10);
+      return res.status(200).json({
+        message: "No new images added. All were duplicates or invalid.",
+        addedImages: 0,
+        duplicateImages,
+        data: album,
+      });
+    }
+
+    // Update album with only new images
+    const data = await Album.updateOne(
+      { _id: albumId },
+      {
+        $push: { Images: { $each: newImages } },
+        updatedAt: new Date(),
+      }
+    );
+    console.log("Update response:", data);
+
+    const updatedAlbum = await Album.findById(albumId);
+    res.status(200).json({
+      message: "Album updated successfully",
+      addedImages: newImages.map((id) => id.toString()),
+      duplicateImages,
+      data: updatedAlbum,
+    });
+  } catch (error) {
+    console.error("Error in addImageToAlbum:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 }
+
 async function getAlbumById(req,res) {
   let _id = new mongoose.Types.ObjectId(String(req.params.id));
 
  try {
-  let data = await Album.findById(_id)
+  let data = await Album.find(_id)
    res.status(200).json({
      data,
    });
@@ -163,5 +236,36 @@ async function getAlbumImages(req, res) {
     });
   }
 }
+async function generateLinkAlbum(req, res) {
+  try {
+    console.log(1);
 
-module.exports = {getAlbumImages, getAllAlbum,addNewAlbum,addImageToAlbum,getAlbumById,deleteAlbum };
+    if (!req.body.shareById || !req.body.albumId) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+    const sharedById = new mongoose.Types.ObjectId(req.body.shareById);
+    const albumId = new mongoose.Types.ObjectId(req.body.albumId);
+    const newLink = new SharedLink({ albumId, sharedById });
+    const data = await newLink.save();
+    res.status(200).json({
+      message: "Link Generated",
+      data,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      message: "Something Went Wrong",
+      error: error.message,
+    });
+  }
+}
+
+module.exports = {
+  generateLinkAlbum,
+  getAlbumImages,
+  getAllAlbum,
+  addNewAlbum,
+  addImageToAlbum,
+  getAlbumById,
+  deleteAlbum,
+};

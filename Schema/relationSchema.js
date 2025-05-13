@@ -12,8 +12,18 @@ const relationSchema = new mongoose.Schema({
     enum: ["pending", "accepted", "rejected"],
     required: true,
   },
+  autoSend: {
+    userId: {
+      enabled: { type: Boolean, default: false },
+      descriptorId: { type: mongoose.Schema.Types.ObjectId, default: null },
+    },
+    friendId: {
+      enabled: { type: Boolean, default: false },
+      descriptorId: { type: mongoose.Schema.Types.ObjectId, default: null },
+    },
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
-const Relation = mongoose.model("Relation", relationSchema,"Relations");
-module.exports =Relation
+const Relation = mongoose.model("Relation", relationSchema, "Relations");
+module.exports = Relation;

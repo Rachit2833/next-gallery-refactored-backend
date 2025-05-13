@@ -33,6 +33,7 @@ app.use("/login", authRouter);
 app.use("/friends",friendRouter);
 
 
+
 app.all("*",(req,res)=>{
    res.status(404).json({
       message:`Cannot Find the ${req.originalUrl} `
