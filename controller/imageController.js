@@ -1,6 +1,7 @@
 const mongoose  = require("mongoose");
 const Image = require("../Schema/imageSchema");
 const Label = require("../Schema/labelSchema");
+const SharedLink = require("../Schema/sharedLink")
 const multer = require("multer");
 const uploadFile = require("../upload");
 const { json } = require("body-parser");
@@ -25,6 +26,7 @@ async function test2(req,res ,next) {
 }
 async function uploadToStorage(req, res, next) {
   try {
+    console.log("hello world",req.file);
     if (!req.file) {
       throw new Error("No File upload failed");
     }
@@ -189,6 +191,7 @@ async function getImageById(req, res) {
 }
 async function deleteImage(req,res){
   const id = req.query.img_id;
+  console.log(id);
  try {
    const data = await Image.findById(id).deleteOne()
    res.status(200).json({
@@ -200,6 +203,22 @@ async function deleteImage(req,res){
     })
  }
 }
+async function deleteAllImages(req, res) {
+  try {
+    const ids = req.body.idArray;
+    const data = await Image.deleteMany({ _id: { $in: ids } });
+    console.log(data);
+    res.status(200).json({
+      message: "All images deleted successfully",
+      deletedCount: data.deletedCount, // Number of deleted images
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Something Went Wrong",
+    });
+  }
+}
+
 async function setAndUnsetFavourite(req,res) {
    const id = new mongoose.Types.ObjectId(String(req.params.id));
   const favValue=req.body.Favourite;
@@ -300,10 +319,71 @@ async function searchImages(req,res) {
        });
     }
 }
+async function generateLink(req,res) {
+  try {
+    
+    const sharedById  = new mongoose.Types.ObjectId(req.body.imgIds);
+    const ids = req.body.sharedById.map( (id) => new mongoose.Types.ObjectId(id));
+    const newLink = new SharedLink({ imageIds: ids, sharedById: sharedById });
+    const data = await  newLink.save();
+    console.log(data);
+    res.status(200).json({
+      message: "Link Generated",
+      data,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Something Went Wrong",
+    });
+  }
+}
+async function getLinkData(req,res) {
+  try {
+    const id=req.query.id
+    if(!id){
+      res.status(400).json({
+        message: "Something Went Wrong",
+      });
+    }
+    const data = await SharedLink.findById(id)
+      .populate("imageIds")
+      .populate("albumId");
+    res.status(200).json({
+      data,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Something Went Wrong",
+    });
+  }
+}
+async function duplicateImages(req, res) {
+  try {
+
+    const images = await Image.find({ _id: { $in: req.body.ids } });
+     const newImages = images.map((item)=>{
+      const abc = item.toObject();
+      delete abc._id;
+      delete abc.__v;
+      abc.Favourite = false;
+      console.log(abc,"abc");
+      return abc;
+     })
+    const data = await Image.insertMany(newImages);
+    res.status(200).json({
+      message: "Images Saved To user",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to duplicate images" });
+  }
+}
+
 
 
 
 module.exports = {
+  duplicateImages,
   upFun,
   uploadToStorage,
   searchImages,
@@ -316,6 +396,9 @@ module.exports = {
   test,
   getAllImagesForLocation,
   getAllLocations,
+  deleteAllImages,
+  generateLink,
+  getLinkData
   
 };
 

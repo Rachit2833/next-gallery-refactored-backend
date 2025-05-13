@@ -3,6 +3,7 @@ const Message = require("../Schema/messageSchema");
 const GroupMessage = require("../Schema/groupMessageSchema");
 const Group = require("../Schema/groupSchema");
 const { default: mongoose } = require("mongoose");
+const SharedLink = require("../Schema/sharedLink");
 
 
 // Importing here to avoid circular dependency
@@ -219,7 +220,40 @@ async function sendGroupMessage(req, res) {
           })
        }
     }
+ async function generateGroupInvite(req,res) {
+      try {
+        console.log(req.body,"hello");
+         const inviteId= req.body.inviteId
+         const sharedById= req.body.shareById
+         const newLink = new SharedLink({inviteId,sharedById})
+         const data = await newLink.save()
+         res.status(200).json({
+           data,
+         });
+      } catch (error) {
+         res.status(404).json({
+           message: "Something went wrong",
+         });
+      }
+    }
+async function useGroupInvite(req,res) {
+  try {
+    const inviteId = new mongoose.Types.ObjectId(req.query.inviteId);
+  const data = await SharedLink.findById(inviteId).populate({
+    path: "inviteId",
+    populate: {
+      path: "people", 
+    },
+  });
+    res.status(200).json({
+      data,
+    });
+  } catch (error) {
+    res.status(404).json({
+      message: "Something went wrong",
+    });
+  }
+}
 
 
-
-module.exports = { sendMessage, getAllMessages,addGroup,deleteGroup,getAllGroups,updateGroup,sendGroupMessage,getAllMessagesNew}
+module.exports = { useGroupInvite,generateGroupInvite,sendMessage, getAllMessages,addGroup,deleteGroup,getAllGroups,updateGroup,sendGroupMessage,getAllMessagesNew}
