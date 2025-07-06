@@ -7,6 +7,7 @@ const uploadFile = require("../upload");
 const { json } = require("body-parser");
 
 
+
 const storage = multer.memoryStorage();
 const fileFilter = (req, file, cb) => {
 if (file.mimetype.startsWith("image/") || file.mimetype.startsWith("video/")) {
@@ -48,6 +49,9 @@ async function uploadToStorage(req, res, next) {
 async function getAllImages(req, res) {
   try {
     const query = { ...req.query };
+    const page = req.query.page||1
+    const limit = req.query.limit || 27
+    console.log(page,limit);
     const reservedNames = ["sort", "page", "limit", "fields"];
     reservedNames.forEach((param) => delete query[param]);
     const filter = {};
@@ -69,8 +73,15 @@ async function getAllImages(req, res) {
        filter["People.id"]={ $eq:id}
     } 
     delete query.frId;
-    const images = await Image.find(filter).populate("People");
-    return res.status(200).json({ images });
+    const images = await Image.find(filter)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("People")
+      .populate("sharedBy");
+    console.log(images.length);
+    const count = await Image.countDocuments()
+    const leftPage=(count - (page) * limit)
+    return res.status(200).json({ images,leftPage,});
   } catch (error) {
     // Handle errors and respond with a message
     return res.status(500).json({
@@ -80,9 +91,12 @@ async function getAllImages(req, res) {
   }
 }
 
+
 async function addNewImage(req, res) {
   try {
     req.body.Location = JSON.parse(req.body.Location);
+    const { getImageBlurred } = await import("../lib/util.mjs");
+    req.body.blurredImage = await getImageBlurred(req.body.ImageUrl);
     const newImage = new Image(req.body); 
     const image = await newImage.save();
     console.log(image);
@@ -322,8 +336,8 @@ async function searchImages(req,res) {
 async function generateLink(req,res) {
   try {
     
-    const sharedById  = new mongoose.Types.ObjectId(req.body.imgIds);
-    const ids = req.body.sharedById.map( (id) => new mongoose.Types.ObjectId(id));
+    const sharedById = new mongoose.Types.ObjectId(req.body.sharedById);
+    const ids = req.body.imgIds.map((id) => new mongoose.Types.ObjectId(id));
     const newLink = new SharedLink({ imageIds: ids, sharedById: sharedById });
     const data = await  newLink.save();
     console.log(data);
@@ -359,17 +373,18 @@ async function getLinkData(req,res) {
 }
 async function duplicateImages(req, res) {
   try {
-
+   console.log(req.body.sharedById);
     const images = await Image.find({ _id: { $in: req.body.ids } });
      const newImages = images.map((item)=>{
       const abc = item.toObject();
       delete abc._id;
       delete abc.__v;
       abc.Favourite = false;
-      console.log(abc,"abc");
+      abc.sharedBy = new mongoose.Types.ObjectId(req.body.sharedById);
       return abc;
      })
     const data = await Image.insertMany(newImages);
+    console.log(data);
     res.status(200).json({
       message: "Images Saved To user",
     });
