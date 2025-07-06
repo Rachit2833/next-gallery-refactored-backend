@@ -40,7 +40,7 @@ AlbumSchema.pre("save", function (next) {
     (id, index, self) => self.indexOf(id) !== index
   );
 
-  this.Images = uniqueImages.map((id) => mongoose.Types.ObjectId(id)); // Ensure IDs are in ObjectId format
+  this.Images = uniqueImages.map((id) =>  new mongoose.Types.ObjectId(id)); // Ensure IDs are in ObjectId format
 
   // Continue saving but send a warning if there were duplicates
   if (duplicateImagesCount > 0) {
