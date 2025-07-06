@@ -29,8 +29,8 @@ async function getAllAlbum(req, res) {
   }
 }
 async function addNewAlbum(req, res) {
-
-  try {
+    console.log(1);
+  try {  
     const newAlbum = new Album(req.body); // Use req.body instead of req.data
     const album = await newAlbum.save();
     res.status(200).json({
@@ -38,6 +38,7 @@ async function addNewAlbum(req, res) {
       data: album,
     });
   } catch (error) {
+    console.error(error);
     res.status(400).json({
       message: "Something Went Wrong",
       error: error.message,
