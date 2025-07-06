@@ -25,7 +25,7 @@ async function page({ params ,searchParams }) {
       <div className="flex items-center">
         <SideFilterLayout formType="img" year={year} />
       </div>
-      <Card className="h-[85vh]" x-chunk="dashboard-06-chunk-0 ">
+      <Card className="min-h-[85vh]" x-chunk="dashboard-06-chunk-0 ">
         <CardHeader>
           <CardTitle>Your Saved Images From Album August 2024</CardTitle>
           <CardDescription>

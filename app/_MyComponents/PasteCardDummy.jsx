@@ -13,9 +13,8 @@ import { Deletebutton } from "./ImageCard";
 import { useFormStatus } from "react-dom";
 import { useUser } from "../_lib/context";
 import { Earthbutton } from "./UploadCard";
+
 function getSeason() {
-
-
    const now = new Date();
    const month = now.getMonth(); // January is 0, December is 11
    const year = now.getFullYear();
@@ -32,17 +31,17 @@ function getSeason() {
    return `${season} ${year}`
 }
 
-function PasteCardDummy({ setDrawerOpen, fileInput = true, onClick, urlBlob }) {
-   const [file, setFile] = useState()
-   const [fileBlob, setFileBlob] = useState()
-   const [lat, setLat] = useState(null)
-   const [long, setLong] = useState(null)
+function PasteCardDummy({ setDrawerOpen, fileInput = true,  urlBlob }) {
+   const [file, setFile] = useState();
+   const [fileBlob, setFileBlob] = useState();
+   const [lat, setLat] = useState(null);
+   const [long, setLong] = useState(null);
    const [description, setDescription] = useState("Fall 2024");
    const [location, setLocation] = useState("Arrakis");
    const [locationData, setLocationData] = useState(null);
    const [isPending, setIsPending] = useState(false);
    const descriptionPlaceholder = getSeason();
-   const { addNewLabel, checkLabels, detectFaceInCapturedImage, getPeopleInImage } = useUser()
+   const { addNewLabel, checkLabels, detectFaceInCapturedImage, getPeopleInImage } = useUser();
 
    async function urlToBlob(url) {
       try {
@@ -60,28 +59,30 @@ function PasteCardDummy({ setDrawerOpen, fileInput = true, onClick, urlBlob }) {
       }
    }
 
-
    const handleLocationBlur = (e) => {
       setLocation(e.target.value); // Update the state with value
    };
-   async function onSubmit() {
-      const result = await detectFaceInCapturedImage(fileInput ? file : urlBlob);
-      const formData = new FormData()
-      if (fileInput) {
-         formData.append("photo", fileBlob)
-      } else {
-         const abc = await urlToBlob(urlBlob)
-         formData.append("photo", abc)
-      }
-      formData.append("LocationName", location)
-      formData.append("Country", "India")
-      formData.append("People", JSON.stringify(result))
-      saveNewImage(formData)
-      setDrawerOpen(false)
-   }
+
+   // async function onSubmit() {
+   //    const result = await detectFaceInCapturedImage(fileInput ? file : urlBlob);
+   //    const formData = new FormData();
+   //    if (fileInput) {
+   //       formData.append("photo", fileBlob)
+   //    } else {
+   //       const abc = await urlToBlob(urlBlob)
+   //       formData.append("photo", abc)
+   //    }
+   //    formData.append("LocationName", location);
+   //    formData.append("Country", "India");
+   //    formData.append("People", JSON.stringify(result));
+   //    saveNewImage(formData);
+   //    setDrawerOpen(false);
+   // }
+
    const handleDescriptionBlur = (e) => {
       setDescription(e.target.value); // Update the state with innerText
    };
+
    function getCoordinates(e) {
       e.preventDefault();
       setIsPending(true);
@@ -113,10 +114,9 @@ function PasteCardDummy({ setDrawerOpen, fileInput = true, onClick, urlBlob }) {
          });
    }
 
-
    return (
       <>
-         <div className="mx-auto bg-[#441752] rounded-lg shadow-md md:p-4 p-2 m-2 w-full max-w-xs lg:max-w-sm">
+         <div className="mx-auto bg-[#f6f3f6] rounded-lg shadow-md md:p-4 p-2 m-2 w-full max-w-xs lg:max-w-sm">
             <div className="bg-gray-200 rounded-t-lg cursor-pointer">
                <Image
                   width={352}
@@ -130,13 +130,16 @@ function PasteCardDummy({ setDrawerOpen, fileInput = true, onClick, urlBlob }) {
                {/* Wrap the form around the inputs and submit button */}
                <form className="grid grid-cols-6 gap-4" onSubmit={getCoordinates}>
                   <Input
-                     className="col-span-5 h-6 border-none "
+                     className="col-span-5 h-6 border-none"
                      name="LocationName"
                      onChange={handleLocationBlur}
                      value={location}
                   />
-                  {!isPending ? <Earthbutton /> : <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin"></div>
-                  }
+                  {!isPending ? (
+                     <Earthbutton />
+                  ) : (
+                     <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin"></div>
+                  )}
                </form>
 
                <Input
@@ -155,28 +158,6 @@ function PasteCardDummy({ setDrawerOpen, fileInput = true, onClick, urlBlob }) {
                </div>
             </div>
          </div>
-         <form action={onSubmit} className="grid w-full items-center gap-1.5">
-            {/* {fileInput ? <Input
-               name="photo"
-               onChange={(e) => {
-                  if (e.target.files[0]) {
-                     setFile(URL.createObjectURL(e.target.files[0])); // Create a preview URL for the uploaded image
-                     setFileBlob(e.target.files[0])
-                  }
-               }}
-               className="border border-input bg-transparent h-9 flex w-full rounded-md file:h-9 file:bg-primary file:text-white file:text-sm file:font-medium"
-               type="file"
-               id="picture"
-            /> : null} */}
-            <input name="LocationName" value={location || ""} className=" hidden" readOnly />
-            <input name="lat" value={lat || ""} className=" hidden" readOnly />
-            <input name="long" value={long || ""} className=" hidden" readOnly />
-            <input name="Country" value="India" className=" hidden" readOnly />
-            {/* <Deletebutton text={"Submit"} /> */}
-            {/* <DrawerClose onClick={() => setDrawerOpen(false)} className="border-2 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 px-4 py-2 bg-white text-black shadow">
-               Cancel
-            </DrawerClose> */}
-         </form>
       </>
    );
 }

@@ -1,28 +1,64 @@
+"use client";
+import { useEffect, useState } from "react";
+import Messages from "./Messages";
+import { useUser } from "@/app/_lib/context";
+import MessageLoader from "../Loaders/MessageLoader";
 
-import Messages from "./Messages"
-import { cookies } from "next/headers";
+function Content({ sessionToken, decodedValue }) {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const { isSelected } = useUser();
+  console.log(isSelected,"selec");
+  useEffect(() => {
+    let isMounted = true; 
 
-async function Content({decodedValue,query}) {
-  const cookieStore = await cookies()
-  const userId = decodedValue?.user?.id;
-  const res = await fetch(`http://localhost:2833/message?_id=${userId}&selectedID=${query.id}`,{
-    headers: {
-      "Content-Type": "application/json",
-       authorization: `Bearer ${cookieStore.get("session").value}`,
-    },
-  });
+    const fetchMessages = async () => {
+      if (!decodedValue?.user?.id || !isSelected?._id || !sessionToken) return;
 
-  
-  const data = await res.json()
+      setLoading(true);
+      try {
+        const userId = decodedValue.user.id;
+        const res = await fetch(
+          `http://localhost:2833/message?_id=${userId}&selectedID=${isSelected._id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              authorization: `Bearer ${sessionToken}`,
+            },
+          }
+        );
 
-      return (
-        data?.data?.map((message,index )=>{
-              return <Messages key={index} message={message} />
-        })
-      )
+        const data = await res.json();
+        if (isMounted) {
+          setMessages(data?.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
 
+    fetchMessages();
+
+    return () => {
+      isMounted = false; // Cleanup to prevent memory leaks
+    };
+  }, [sessionToken, decodedValue?.user?.id, isSelected?._id]);
+
+  if (loading) {
+    return <MessageLoader />;
+  }
+
+  return (
+    <>
+      {messages.length > 0 ? (
+        messages.map((message, index) => <Messages key={index} message={message} />)
+      ) : (
+        <p className="text-gray-500">No messages found.</p>
+      )}
+    </>
+  );
 }
 
-export default Content
-
-
+export default Content;

@@ -4,6 +4,12 @@ import * as faceapi from "@vladmandic/face-api";
 const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
 export const UserProvider = ({ children }) => {
+const [selectedImages,setSelectedImages]=useState([])
+const [imageLeft,setImageLeft]=useState(0)
+const [url, setUrl] = useState(null);
+  const [userID, setUserId] = useState(null)
+  const [isOn, setIsOn] = useState(false);
+const [fetchedImages, setFetchedImages] = useState(null);
 const [isImageOpen, setIsImageOpen] = useState(false);
 const [modelImages, setModelImages] = useState(null);
 const [searchVal, setSearchVaL] = useState(null);
@@ -19,6 +25,10 @@ const [joinedGroup, setJoinedGroup] = useState([]);
 const [isInfoOpen, setIsInfoOpen,]=useState(false)
 const [groupSelection, setGroupSelection] = useState(false);
 const [isInputing, setIsInputing] = useState(null);
+const [isOpen,setIsOpen]=useState(null)
+const [isEnabled, setIsEnabled] = useState(null);
+const [isLoadingLink, setIsLoadingLink] = useState(false);
+const [isTest, setIsTest] = useState(false);
  const infoRef = useRef();
  const contentRef = useRef();
 
@@ -59,57 +69,88 @@ const getPeopleInImage = async () => {
 };
 
 const detectFaceInCapturedImage = async (imageBlob) => {
-      const img = new window.Image();
-      img.src = imageBlob;
-      await new Promise((resolve) => (img.onload = resolve));
+  const img = new window.Image();
+  img.src = imageBlob;
+  await new Promise((resolve) => (img.onload = resolve));
 
-      const faceInfo = await checkLabels();
-      const faceMatcher = new faceapi.FaceMatcher(faceInfo);
+  const faceInfo = await checkLabels();
+  const hasValidDescriptors = faceInfo.length > 0;
+  const faceMatcher = hasValidDescriptors
+    ? new faceapi.FaceMatcher(faceInfo)
+    : null;
 
-      const detections = await faceapi
-         .detectAllFaces(img).withFaceLandmarks().withFaceDescriptors().withFaceExpressions();
-      const results = await Promise.all(
-         detections.map(async (detect) => {
-            if (detect) {
-               console.log(detect);
-               const bestMatch = faceMatcher.findBestMatch(detect.descriptor);
-               if (bestMatch.label === "unknown") {
-                  const newLabelName = `Person_${Date.now()}`;
-                  const faceDescriptor = Array.from(detect.descriptor);
+  const detections = await faceapi
+    .detectAllFaces(img)
+    .withFaceLandmarks()
+    .withFaceDescriptors()
+    .withFaceExpressions();
 
-                  const data = {
-                     label: newLabelName,
-                     descriptors: [faceDescriptor],
-                  };
+  const results = await Promise.all(
+    detections.map(async (detect) => {
+      if (detect) {
+        console.log(detect);
 
-                  const doc= await addNewLabel(data); 
-                  console.log(doc, "reas check");
-                  return doc;
-               } else {
-                  console.log("detect known", bestMatch);
-                  const labelResponse = await fetch(`http://localhost:2833/labels/${bestMatch._label}`);
-                  if (!labelResponse.ok) {
-                     console.error("Error fetching label:", labelResponse.statusText);
-                     return;
-                  }
-                  const labelData = await labelResponse.json();
-                  console.log(labelData,"labelData");
-                  const id = labelData[0]._id;
-                  console.log(id);
-                  return id;
-               }
+        let bestMatch;
+        if (faceMatcher) {
+          bestMatch = faceMatcher.findBestMatch(detect.descriptor);
+        }
+
+        if (!bestMatch || bestMatch.label === "unknown") {
+          const newLabelName = `Person_${Date.now()}`;
+          const faceDescriptor = Array.from(detect.descriptor);
+
+          const data = {
+            label: newLabelName,
+            descriptors: [faceDescriptor],
+          };
+
+          const doc = await addNewLabel(data);
+          console.log(doc, "reas check");
+          return doc;
+        } else {
+          console.log("detect known", bestMatch);
+          try {
+            const labelResponse = await fetch(
+              `http://localhost:2833/labels/${bestMatch._label}`
+            );
+            if (!labelResponse.ok) {
+              console.error("Error fetching label:", labelResponse.statusText);
+              return;
             }
-            return "No face detected.";
-         })
-      );
+            const labelData = await labelResponse.json();
+            console.log(labelData, "labelData");
+            const id = labelData[0]._id;
+            console.log(id);
+            return id;
+          } catch (error) {
+            console.error("Error fetching label data:", error);
+            return "Error fetching label data";
+          }
+        }
+      }
+      return "No face detected.";
+    })
+  );
 
-      console.log(results); // Log all face recognition results
-      return results;
-   };
+  console.log(results); // Log all face recognition results
+  return results;
+};
+  
 
   return (
     <UserContext.Provider
       value={{
+        isOn, setIsOn,
+        imageLeft,
+        setImageLeft,
+        fetchedImages,
+        setFetchedImages,
+        url,
+        setUrl,
+        isLoadingLink,
+        setIsLoadingLink,
+        selectedImages,
+        setSelectedImages,
         addNewLabel,
         checkLabels,
         detectFaceInCapturedImage,
@@ -146,6 +187,14 @@ const detectFaceInCapturedImage = async (imageBlob) => {
         setGroupSelection,
         isInputing,
         setIsInputing,
+        isOpen,
+        setIsOpen,
+        isEnabled,
+        setIsEnabled,
+        isTest,
+        setIsTest,
+        userID,
+        setUserId,
       }}
     >
       {children}

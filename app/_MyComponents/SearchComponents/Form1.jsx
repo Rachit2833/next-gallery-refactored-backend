@@ -38,9 +38,10 @@ function Form1({ res,  }) {
                   </div>
                </div>
                <Separator />
-               {users?.map((item, index) => (
-                  <SelectPeople key={index} item={item.friendId} />
-               ))}
+               {users?.map((item, index) => {
+                  console.log(item,":item");
+                  return <SelectPeople key={index} item={item} />
+               })}
             </div>
          </div></>
    )

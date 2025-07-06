@@ -1,6 +1,8 @@
 // fileUtils.js
 const fs = require("fs");
 const path = require("path");
+import { getPlaiceholder } from "plaiceholder";
+
 
 const saveImage = (folderName, imageName, imageData) => {
   // Define the path where the image will be saved
@@ -23,4 +25,21 @@ const saveImage = (folderName, imageName, imageData) => {
   console.log(`Image saved: ${filePath}`);
 };
 
-module.exports = { saveImage };
+
+async function getImageBlurred(src) {
+  try {
+    const buffer = await fetch(src).then(async (res) =>
+      Buffer.from(await res.arrayBuffer())
+    );
+    const { base64 } = await getPlaiceholder(buffer);
+
+    return base64;
+  } catch (err) {
+    console.error("Error in getImageBlurred:", err);
+    return null;
+  }
+}
+
+
+
+module.exports = { saveImage,getImageBlurred };

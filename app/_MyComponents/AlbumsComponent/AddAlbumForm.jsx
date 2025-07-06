@@ -15,20 +15,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PlusCircle } from "lucide-react";
 import { useState, useTransition } from "react";
+import { SubmitButton } from "../SignUpForm";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
-function AddAlbumForm({setIsOpen, }) {
-   const [isPending, startTransition] = useTransition();
-
-   async function handleSubmit(formData) {
-      console.log("hello world");
-      // Using `startTransition` to ensure state updates after server action
-      await createNewAlbum(formData); // Call the server action with formData
-      startTransition(() => {
-         setIsOpen(false); // Close the drawer after server action completes
-      });
-
-   }
-
+function AddAlbumForm({ setIsOpen, }) {
+   const { toast } = useToast()
    return (
 
       <div className="w-[80%] lg:w-[40%] mx-auto">
@@ -48,7 +40,43 @@ function AddAlbumForm({setIsOpen, }) {
                      </DrawerDescription>
                   </DrawerHeader>
                   <DrawerFooter>
-                     <form action={handleSubmit}>
+                     <form action={async (formData) => {
+                        try {
+
+
+                           const options = {
+                              weekday: "long",
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                              hour: "numeric",
+                              minute: "numeric",
+                              hour12: true,
+                           };
+                           const description = new Date().toLocaleString("en-US", options);
+
+                           const res = await (formData);
+
+                           if (res?.message === "Album Saved") {
+                              setIsOpen(false);
+                              toast({
+                                 title: "Album Added Successfully",
+                                 description: description,
+                                 action: <ToastAction altText="Goto schedule to undo">Done</ToastAction>,
+                              });
+                           } else {
+                              throw new Error(res?.message || "Album creation failed");
+                           }
+                        } catch (error) {
+                           console.log(error, "hello");
+                           toast({
+                              title: "Album Creation Failed",
+                              description: error.message || "Something went wrong!",
+                              action: <ToastAction altText="Try Again">Retry</ToastAction>,
+                           });
+                        }
+                     }}>
+
                         <div className="grid w-full grid-cols-2 items-center gap-1.5">
                            <div className="col-span-2">
                               <Label htmlFor="Title">Title</Label>
@@ -74,7 +102,7 @@ function AddAlbumForm({setIsOpen, }) {
                            <div className="col-span-2">
                               <Label htmlFor="Cover-Image">Cover Image</Label>
                               <Input
-                                 name="Cover-Image"
+                                 name="photo"
                                  className="w-full"
                                  id="Cover-Image"
                                  type="file"
@@ -83,9 +111,7 @@ function AddAlbumForm({setIsOpen, }) {
                         </div>
 
                         <div className="mt-4 flex flex-col gap-2 justify-center">
-                           <Button type="submit" className="w-full">
-                              {isPending ? "Creating..." : "Submit"}
-                           </Button>
+                           <SubmitButton buttonText="Create Album" />
                         </div>
                      </form>
                   </DrawerFooter>

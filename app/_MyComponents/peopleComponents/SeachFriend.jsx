@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { set } from "zod";
 
 function SeachFriend({ group,item, }) {
+
    const { setIsSelected, activeUser, isSelected, groupMenu, selectedInGroup, setSelectedInGroup } = useUser();
    const id = item.userId._id !== localStorage.getItem("userId") ? item.userId._id : item.friendId._id 
    const searchParams = useSearchParams()
@@ -23,7 +24,8 @@ function SeachFriend({ group,item, }) {
     useEffect(()=>{
       if(item._id===paramValue){
          const data = item.userId._id !== localStorage.getItem("userId") ? item.userId : item.friendId 
-         setIsSelected(data)
+         const autoSend = item.userId._id !== localStorage.getItem("userId") ? item.autoSend.friendId : item.autoSend.userId
+         setIsSelected({...data,autoSend})
       }
     },[paramValue])
   function onChange(id){
@@ -42,9 +44,10 @@ function SeachFriend({ group,item, }) {
          <div
             onClick={() =>{
                if(!groupMenu){
-                  const data = item.userId._id !== localStorage.getItem("userId") ? item.userId : item.friendId 
-                  setIsSelected(data)
-                  handleParams(data._id, "id")
+                  const idBit = item.userId._id !== localStorage.getItem("userId") ?1:0
+                  const data = item.userId._id !== localStorage.getItem("userId") ? item.userId : item.friendId
+                  const autoSend = item.userId._id !== localStorage.getItem("userId") ? item.autoSend.friendId : item.autoSend.userId
+                  setIsSelected({ ...data, autoSend,rId:item._id,idBit })
                }
                }}
             className={`${isSelected?._id === id&& !groupMenu  ? "bg-green-500" : ""

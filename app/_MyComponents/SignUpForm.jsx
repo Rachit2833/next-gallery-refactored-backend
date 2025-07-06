@@ -10,18 +10,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { signUpUser } from "../_lib/actions";
 import { useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
-import { useUser } from "../_lib/context";
+import { signUpUser } from "../_lib/actions.js";
+
 function SignUpForm() {
    const router = useRouter()
    async function handleSubmit(formData) {
-         const data = await signUpUser(formData);
-         if (data) {
-            router.push("/");
-            localStorage.setItem('userId',data.user._id)
-         }
+      const data = await signUpUser(formData);
+      if (data) {
+         router.push("/");
+         localStorage.setItem('userId', data.user._id)
+      }
    }
    return (
       <form action={handleSubmit}>
@@ -62,7 +62,7 @@ function SignUpForm() {
             <Button variant="outline" type="submit">
                Cancel
             </Button>
-            <SubmitButton variant="default" buttonText="Continue"  type="submit">
+            <SubmitButton variant="default" buttonText="Continue" type="submit">
                Continue <ArrowRight />
             </SubmitButton>
          </CardFooter>
@@ -71,18 +71,17 @@ function SignUpForm() {
 }
 
 export default SignUpForm
-export function SubmitButton({ size,variant,buttonText }) {
+export function SubmitButton({ size, variant, buttonText }) {
    const { pending } = useFormStatus();
-   const { selectedInGroup }=useUser()
 
    return (
-      <Button variant={variant} size={size ||"default"} type="submit" className="w-full" disabled={pending}>
+      <Button variant={variant} size={size || "default"} type="submit" className="w-full" disabled={pending}>
          {pending ? (
             <>
                <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
             </>
          ) : (
-             buttonText|| "Leave"
+            buttonText || "Leave"
          )}
       </Button>
    );

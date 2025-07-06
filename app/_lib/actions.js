@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-
+import{ getImageBlurred} from "../_lib/utils"
 // const cookieStore = await cookies();
 
 export async function updateName(formData) {
@@ -47,23 +47,64 @@ export async function deleteImagesAction(formData) {
 export async function createNewAlbum(formData) {
   const cookieStore = await cookies();
   try {
-    const Name = formData.get("Title");
-    const Description = formData.get("Description");
+    const Name = String(formData.get("Title") ?? "");
+    const Description = String(formData.get("Description") ?? "");
+    const photo = formData.get("photo"); // This is already a File object
+    const formDataToSend = new FormData();
+    formDataToSend.append("Name", Name);
+    formDataToSend.append("Description", Description);
+    formDataToSend.append("photo", photo); 
 
-    const data = await fetch("http://localhost:2833/album", {
+    const res = await fetch("http://localhost:2833/album", {
       method: "POST",
-     headers: {
-        "Content-Type": "application/json",
+      headers: {
         authorization: `Bearer ${cookieStore.get("session").value}`,
       },
-      body: JSON.stringify({ Name, Description }),
+      body: formDataToSend, // Send as FormData
     });
+
+    const data = await res.json();
     revalidatePath("/albums");
+    return data;
   } catch (error) {
     console.error(error);
-     throw new Error(`Failed to Create Album`,error.message);
+    throw new Error(`Failed to Create Album: ${error.message}`);
   }
 }
+export async function saveSharedAlbum(dataX) {
+  console.log(dataX, "data");
+  const cookieStore = await cookies();
+
+  try {
+    const res = await fetch("http://localhost:2833/album/share/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${cookieStore.get("session")?.value}`,
+      },
+      body: JSON.stringify(dataX),
+    });
+
+    // Check if the response is not okay
+    if (!res.ok) {
+      const errorData = await res.json(); // Try extracting error message
+      throw new Error(
+        errorData?.message || `HTTP error! Status: ${res.status}`
+      );
+    }
+
+    const data = await res.json();
+    console.log(data, "hello");
+    revalidatePath("/albums");
+
+    return data;
+  } catch (error) {
+    console.error("Save album failed:", error);
+    throw new Error(`Failed to Create Album: ${error.message}`);
+  }
+}
+
+
 export async function deleteAlbumAction(formData) {
   const cookieStore = await cookies();
   const id = formData.get("albumId");
@@ -106,10 +147,10 @@ export async function updateFavourite(formData) {
     throw new Error("Failed to update favourite");
   }
 }
-export async function saveNewImage(formData) {
-  const cookieStore = await cookies();
+export async function saveNewImage(formData,id) {
+    const cookieStore = await cookies();
     const peoples = JSON.parse(formData.get("People"));
-    const data= new FormData()
+    const data = new FormData()
     data.append('photo',formData.get("photo"))
     data.append("Location",JSON.stringify({ name: formData.get("LocationName"), coordinates: [48.8575, 2.3514] }));
     data.append('Description',"hello world")
@@ -121,10 +162,23 @@ peoples.forEach((person) => {
    try {
      const res = await fetch("http://localhost:2833/image/", {
        method: "POST",
-       body:data
+       body: data,
      });
+     const val = await res.json();
+     console.log(val);
      revalidatePath("/");
      revalidatePath("/memory-map");
+     return val;
+    //  let des = await autoSend(id,val.data.People)
+    //  console.log(des);
+    //  const inp = await fetch("http://localhost:2833/image/share", {
+    //    method: "POST",
+    //    headers: {
+    //      "Content-Type": "application/json",
+    //      authorization: `Bearer ${cookieStore.get("session").value}`,
+    //    },
+    //    body: JSON.stringify({ imgId:val.data._id, sharedIds: des }),
+    //  });
    } catch (error) {
      console.error(error);
    }
@@ -265,9 +319,7 @@ export async function handleGroupLeave(userId,groupId,isAdmin) {
   }
 }
 export async function removeUser(removePeople, groupId) {
-  const cookieStore = await cookies();
   try {
-
     const obj1 = {
       removeUser: removePeople,
     };
@@ -288,11 +340,48 @@ export async function removeUser(removePeople, groupId) {
      }
  const data = await response.json();
  revalidatePath("/friends");
+
  return data.updatedGroup;
   } catch (error) {
     console.error(error);
   }
 }
+export async function autoSend(id, friendId) {
+  try {
+    console.log(id,"auto Send id");
+    const response = await fetch(
+      `http://localhost:2833/friends/verify?id=${id}&friendId=${friendId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    if (!data) {
+      console.warn("No data received from the server");
+      return null;
+    }
+    let descriptorId = [];
+    console.log(data.data,"data.data");
+    data.data.forEach((item,i)=>{
+        if (item.userId === id && item.autoSend?.userId?.enabled) {
+          descriptorId.push(item.friendId)
+        } else if (item.autoSend?.friendId?.enabled) {
+          descriptorId.push(item.userId)
+        }
+    })
+    return descriptorId
+  } catch (error) {
+    console.error("Error in autoSend:", error);
+    return null;
+  }
+}
+
 
 export async function addUser(addPeople, groupId) {
   const cookieStore = await cookies();
@@ -440,4 +529,213 @@ export async function signUpUser(formData) {
 export async function logOutUser() {
    const cookieStore =await cookies()
    cookieStore.delete("session")
+}
+export async function changeLabel(id,label,idBit,enabled) {
+  try {
+      const cookieStore = await cookies();
+      const response = await fetch(
+        `http://localhost:2833/friends/autoSend?relationId=${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${cookieStore.get("session").value}`,
+          },
+          body: JSON.stringify({ descriptorID:label,idBit,enabled }),
+          credentials: "include",
+        }
+      );
+       revalidatePath("/friends");
+    if (!response.ok) {
+      console.log(response);
+      throw new Error(`Failed to sign up: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Signup error:", error);
+    throw error;
+  }
+}
+export async function toggleAutoSend(id, enabled, idBit) {
+
+  try {
+    const cookieStore = await cookies();
+    const response = await fetch(
+      `http://localhost:2833/friends/autoSend?relationId=${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${cookieStore.get("session").value}`,
+        },
+        body: JSON.stringify({ enabled, idBit }),
+        credentials: "include",
+      }
+    );
+    revalidatePath("/friends");
+    if (!response.ok) {
+      console.log(response);
+      throw new Error(`Failed to sign up: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error( error);
+    throw error;
+  }
+}
+export async function deleteSharedImages(id,userId) {
+  try {
+    const cookieStore = await cookies();
+    const response = await fetch(`http://localhost:2833/image/share?id=${id}&sharedId=${userId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${cookieStore.get("session").value}`,
+        },
+        credentials: "include",
+      }
+    );
+    revalidatePath("/");
+    if (!response.ok) {
+      console.log(response,"response");
+      throw new Error(`Failed to sign up: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+export async function deleteManyImages(idArray) {
+try {
+   const cookieStore = await cookies();
+  const res = await fetch(`http://localhost:2833/image/all`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: `Bearer ${cookieStore.get("session").value}`,
+    },
+    body: JSON.stringify({ idArray }),
+  });
+  const data= await res.json()
+  console.log(data,"ghjgj");
+
+  if (!res.ok) {
+    throw new Error(`Failed to delete image with status ${res.status}`);
+  }
+  revalidatePath("/");
+} catch (error) {
+  console.error(error);
+}
+}
+export async function generateShareLink(sharedById, imgIds) {
+  try {
+    console.log(sharedById,imgIds);
+    const cookieStore = await cookies();
+    const response = await fetch("http://localhost:2833/image/share", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${cookieStore.get("session").value}`,
+      },
+      body: JSON.stringify({ imgIds, sharedById }),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to sign up: ${response.statusText}`);
+    }
+    const data = await response.json();
+    const url = `http://localhost:3000/share?id=${data.data._id}&sharedId=${sharedById}`;
+    return url;
+  } catch (error) {
+    console.error(error);
+  }
+}
+export async function saveLinkImages(ids,userid) {
+  try {
+  console.log(userid);
+    if(ids.length===0)return
+    const cookieStore = await cookies();
+    const res = await fetch("http://localhost:2833/image/share/images", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${cookieStore.get("session").value}`,
+      },
+      body: JSON.stringify({ ids, sharedById:userid }),
+    });
+    if (!res.ok) {
+      throw new Error(data?.message || "Failed to save images");
+    }
+    const data = await res.json();
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+    throw error
+
+  }
+}
+export async function addImagesToAlbum(id,photoArray) {
+  const cookieStore= await cookies()
+  try {
+    const res = await fetch(`http://localhost:2833/album/${id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${cookieStore.get("session").value}`,
+      },
+      body: JSON.stringify({ photoArray }),
+    });
+    if(!res.ok){
+      console.log(res,":res");
+        throw new Error(`Failed to sign up: ${res.statusText}`);
+    }
+    const data = await res.json() 
+    console.log(data,":data");
+    return data
+  } catch (error) {
+    console.error(error);
+  }
+}
+export async function generateShareLinkAlbum(albumId, shareById) {
+
+    try {
+      const cookieStore = await cookies();
+      const response = await fetch("http://localhost:2833/album/share", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+           authorization: `Bearer ${cookieStore.get("session").value}`,
+        },
+        body: JSON.stringify({ albumId, shareById }),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to sign up: ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log(data,"data");
+      const url = `http://localhost:3000/share?id=${data.data._id}&sharedId=${shareById}&type=album`;
+      return url;
+    } catch (error) {
+      console.error(error);
+    }
+  
+}
+export async function generateGroupInvite(inviteId, shareById) {
+  try {
+    const cookieStore = await cookies();
+    const res = await fetch(`http://localhost:2833/message/group/invite`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${cookieStore.get("session").value}`,
+      },
+      body: JSON.stringify({ inviteId, shareById }),
+    });
+    if(!res.ok){
+        throw new Error(`Failed to sign up: ${res.statusText}`);
+    }
+    const data = await res.json()
+    const url = `http://localhost:3000/friends?inviteId=${data.data._id}&sharedId=${shareById}&type=invite`;
+    return url
+  } catch (error) {
+    console.error(error);
+  }
 }

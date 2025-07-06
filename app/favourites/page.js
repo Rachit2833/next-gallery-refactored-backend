@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import Wrapper from "../_MyComponents/Wrapper"
 import NoImagesDoodle from "../_MyComponents/NoImagesDoodle";
+import Wrapper from "../_MyComponents/Wrapper";
 
 async function page({searchParams}) {
     const query = await searchParams

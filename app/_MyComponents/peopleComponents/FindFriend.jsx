@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { set } from "zod";
 
 function FindFriend({ group, item, }) {
-   console.log(item,"item abc");
+
    const { setIsSelected, activeUser, isSelected, groupMenu, selectedInGroup, setSelectedInGroup } = useUser();
    const searchParams = useSearchParams()
    const paramValue = searchParams.get("selected");
@@ -42,8 +42,11 @@ function FindFriend({ group, item, }) {
          <div
             onClick={() => {
                if (!groupMenu) {
-                  setIsSelected(item)
-                  handleParams(item._id, "id")
+                  const idBit = item.userId._id !== localStorage.getItem("userId") ? 1 : 0
+                  const data = item.userId._id !== localStorage.getItem("userId") ? item.userId : item.friendId
+                  const autoSend = item.userId._id !== localStorage.getItem("userId") ? item.autoSend.friendId : item.autoSend.userId
+                  setIsSelected({ ...data, autoSend, rId: item._id, idBit })
+
                }
             }}
             className={`${isSelected?._id === item._id && !groupMenu ? "bg-green-500" : ""

@@ -2,7 +2,9 @@ import { useUser } from "@/app/_lib/context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 
+
 function SelectPeople({ item }) {
+
    const { selectedInGroup, setSelectedInGroup } = useUser();
 
    const isSelected = selectedInGroup.includes(item._id);
@@ -24,7 +26,7 @@ function SelectPeople({ item }) {
                <AvatarFallback>CN</AvatarFallback>
             </Avatar>
             <div className="flex flex-col justify-center h-full">
-               <h1 className="text-[royalblue] cursor-pointer">{item.name || "Unknown"}</h1>
+               <h1 className="text-[royalblue] cursor-pointer">{item.userId._id === localStorage.getItem('userId') ? item.friendId.name : item.userId.name}</h1>
             </div>
          </div>
          <Separator />

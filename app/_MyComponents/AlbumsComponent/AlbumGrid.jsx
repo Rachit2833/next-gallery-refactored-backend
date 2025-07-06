@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import AlbumCard from "./AlbumCard";
 
 async function AlbumGrid({year}) {
-   const cookieStore = cookies()
+   const cookieStore = await cookies()
    const res = await fetch(`http://localhost:2833/album?year=${year||"all"}`,{
       headers: {
          "Content-Type": "application/json",

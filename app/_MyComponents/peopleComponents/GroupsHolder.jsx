@@ -41,7 +41,6 @@ function GroupHolder({ group, item, }) {
             onClick={() => {
                if (!groupMenu) {
                   setIsSelected(item)
-                  handleParams(item._id,"id")
                }
             }}
             className={`${isSelected?._id === item._id && !groupMenu ? "bg-green-500" : ""

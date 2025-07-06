@@ -1,18 +1,22 @@
 "use client"
-import { use, useEffect, useState } from "react";
+import { Children, use, useEffect, useState } from "react";
 import ImageCard from "../ImageCard";
 import Uploadcard from "../UploadCard";
 import { useUser } from "@/app/_lib/context";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import PasteCardDummy from "../PasteCardDummy";
+import SharedImageCard from "../SearchComponents/SharedImageCard";
 
-function PasteCards({res,cod,frId,query}) {
+function PasteCards({res,cod,frId,query,children}) {
+   
+   
    const router = useRouter();
    const searchParams = useSearchParams()
    const pathName = usePathname()
    const { searchData, setQueryState, } = useUser()
    const [images, setImages] = useState([]);
    const [imageFiles, setImageFiles] = useState([]);
+
    useEffect(()=>{
       if(!query){
          const params = new URLSearchParams(searchParams)
@@ -25,13 +29,6 @@ function PasteCards({res,cod,frId,query}) {
    useEffect(()=>{
       setQueryState(query)
    },[cod,frId,query])
-   const arrayImage = [
-      "/labels/Rachit/1.JPG", "/labels/Rachit/2.JPG",
-      "/labels/Rohit/1.JPG", "/labels/Rohit/2.webp",
-      "/labels/Virat/1.png", "/labels/Virat/2.webp",
-      "/labels/Virat/3.JPG",
-      "/dune.jpg"
-   ];
    const handlePaste = (event) => {
       const clipboardData = event.clipboardData || window.clipboardData;
       const items = clipboardData.items;
@@ -65,18 +62,13 @@ function PasteCards({res,cod,frId,query}) {
       };
    }, [handlePaste]);
    return (
-      <div className="grid md:grid-cols-3 grid-cols-2 gap-4 ">
-        
+      <div className="grid md:grid-cols-3  max-h-[35rem] overflow-auto sm:grid-cols-2 grid-cols-2 gap-4 ">
+           
 
-         {cod && searchData ? searchData?.LocationData[0]?.data.map((item, index)=>(
-            <ImageCard key={index} image={item}  />
-         )) : res?.map((item, index) => (
-            <ImageCard key={index} image={item} />
-         ))}
          {images?.map((item, index) => (
             <PasteCardDummy key={index} img={item.imageUrl} />
          ))}
-
+         {children||null}
       </div>
    );
 }

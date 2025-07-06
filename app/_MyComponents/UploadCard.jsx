@@ -37,8 +37,8 @@ function Uploadcard({ setDrawerOpen, fileInput = true, onClick, urlBlob }) {
    const [locationData, setLocationData] = useState(null);
    const [isPending , setIsPending] = useState(false);
    const descriptionPlaceholder = getSeason();
-   const { addNewLabel, checkLabels, detectFaceInCapturedImage, getPeopleInImage } = useUser()
-   
+   const { addNewLabel, checkLabels, detectFaceInCapturedImage, getPeopleInImage ,isSelected} = useUser()
+
    async function urlToBlob(url) {
       try {
          // Fetch the file from the URL
@@ -71,7 +71,7 @@ function Uploadcard({ setDrawerOpen, fileInput = true, onClick, urlBlob }) {
       formData.append("LocationName", location)
       formData.append("Country", "India")
       formData.append("People", JSON.stringify(result))
-      saveNewImage(formData)
+      saveNewImage(formData,localStorage.getItem("userId"))
       setDrawerOpen(false)
    }
    const handleDescriptionBlur = (e) => {
@@ -189,12 +189,18 @@ function Uploadcard({ setDrawerOpen, fileInput = true, onClick, urlBlob }) {
 }
 
 export default Uploadcard;
-export function Earthbutton() {
-   const { pending } = useFormStatus()
+export function Earthbutton({ type }) {
+   const { pending } = useFormStatus();
+
    return (
-         <>
-         <Button type="submit" disabled={pending} className=" disabled:bg-white disabled:text-black" ><Earth /> </Button>
-         
-         </>
-   )
+      <>
+         <Button
+            type={type || "submit"}
+            disabled={pending}
+            className="disabled:bg-white disabled:text-black"
+         >
+            <Earth />
+         </Button>
+      </>
+   );
 }

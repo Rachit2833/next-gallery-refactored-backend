@@ -8,7 +8,7 @@ import { LogOutIcon } from "lucide-react"; // Import vertical ellipsis icon
 import { useFormStatus } from "react-dom";
 
 function LeaveDialog({children,title,description,action,buttonText}) {
-   const {setIsSelected,selectedInGroup}=useUser()
+   const {setIsSelected,selectedInGroup,}=useUser()
    console.log("Running LeaveDialog");
    return (
       <Dialog>

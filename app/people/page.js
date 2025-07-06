@@ -9,9 +9,8 @@ import {
 import Friends from "../_MyComponents/peopleComponents/Friends";
 import PeopleAvatar from "../_MyComponents/peopleComponents/PeopleAvatar";
 
- export const revalidate=0
- function Page() {
-
+export const revalidate = 0;
+function Page() {
   return (
     <>
       <Card>
@@ -26,7 +25,6 @@ import PeopleAvatar from "../_MyComponents/peopleComponents/PeopleAvatar";
           <Friends>
             <PeopleAvatar />
           </Friends>
-       
         </CardContent>
 
         <CardFooter></CardFooter>
@@ -34,5 +32,3 @@ import PeopleAvatar from "../_MyComponents/peopleComponents/PeopleAvatar";
     </>
   );
 }
-
-export default Page;

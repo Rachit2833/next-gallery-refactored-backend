@@ -2,8 +2,18 @@
 import * as faceapi from "@vladmandic/face-api"
 import MainSlide from "./MainSlide"
 import SideFilterLayout from "./SideFilterLayout"
-function Wrapper({ card, searchYear }) {
-  
+import { useUser } from "../_lib/context"
+import { useEffect } from "react"
+
+function Wrapper({alc, card, searchYear,val }) {
+   const { userID, setUserId } = useUser()
+   useEffect(() => {
+      if (val) {
+         console.log(val.user);
+         setUserId(val);
+      }
+   }, [val, setUserId]);
+   useEffect
    const faceRecognizer = async () => {
       await faceapi.nets.tinyFaceDetector.loadFromUri('/weights');
       await faceapi.nets.faceLandmark68Net.loadFromUri('/weights');
@@ -19,7 +29,7 @@ function Wrapper({ card, searchYear }) {
 
             <SideFilterLayout text="Add Images" year={searchYear} />
          </div>
-         <MainSlide searchYear={searchYear} card={card}  />
+         <MainSlide  val={val} albumComponent={alc}  searchYear={searchYear} card={card}  />
        
 
          </>
