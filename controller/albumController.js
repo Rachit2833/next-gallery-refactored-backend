@@ -10,7 +10,7 @@ async function getAllAlbum(req, res) {
     delete query[el];
   });
   try {
-    if (query.year.toLowerCase() === "all" || query.year === undefined) {
+    if (query.year?.toLowerCase() === "all" || query?.year === undefined) {
       const albums = await Album.find();
       return res.status(200).json({ albums });
     }
@@ -29,8 +29,9 @@ async function getAllAlbum(req, res) {
   }
 }
 async function addNewAlbum(req, res) {
-    console.log(1);
   try {  
+    const { getImageBlurred } = await import("../lib/util.mjs");
+    req.body.blurredImage = await getImageBlurred(req.body.ImageUrl);
     const newAlbum = new Album(req.body); // Use req.body instead of req.data
     const album = await newAlbum.save();
     res.status(200).json({
@@ -206,6 +207,7 @@ async function getAlbumImages(req, res) {
             Description: "$imageDetails.Description",
             Date: "$imageDetails.Date",
             People: "$imageDetails.People",
+            blurredImage:"$imageDetails.blurredImage"
           },
         },
       },

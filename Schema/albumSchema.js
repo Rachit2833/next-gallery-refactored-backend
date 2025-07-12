@@ -7,7 +7,7 @@ const AlbumSchema = new mongoose.Schema(
     Name: {
       type: String,
       required: true,
-      maxlength: [15, "Name cannot exceed 15 characters"],
+      maxlength: [25, "Name cannot exceed 25 characters"],
     },
     Images: [{ type: mongoose.Schema.Types.ObjectId, ref: "Image" }],
     Location: String,
@@ -16,7 +16,7 @@ const AlbumSchema = new mongoose.Schema(
       default: function () {
         return `Memories from ${new Date().toISOString().split("T")[0]}`;
       },
-      maxlength: [25, "Description cannot exceed 25 characters"],
+      maxlength: [35, "Description cannot exceed 35 characters"],
       required: false,
     },
     Date: {
@@ -24,6 +24,10 @@ const AlbumSchema = new mongoose.Schema(
       default: Date.now,
     },
     People: [{ type: mongoose.Schema.Types.ObjectId, ref: "Label" }],
+     blurredImage : {
+      type: String,
+      required:true
+    }
   },
   {
     collection: "Albums",

@@ -39,7 +39,6 @@ const ImageLabelSchema = new mongoose.Schema(
     },
     blurredImage : {
       type: String,
-      required:true
     }
   },
  

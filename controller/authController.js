@@ -98,7 +98,8 @@ async function login(req,res){
         expiresIn:process.env.JWT_EXPIRES
       })
       res.status(200).json({
-        token,
+       token,
+       userId: user._id,
       });
   } catch (error) {
     console.error(error);

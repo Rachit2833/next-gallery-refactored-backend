@@ -1,10 +1,14 @@
 const express = require("express")
-const { addNewImage,  getAllImages, getAllImagesForLocation, getAllLocations, test, getImageById, deleteImage, setAndUnsetFavourite, searchImages, upFun,uploadToStorage,deleteAllImages, generateLink, getLinkData, duplicateImages} = require("../controller/imageController.js")
+const { addNewImage,  getAllImages, getAllImagesForLocation, getAllLocations, test, getImageById, deleteImage, setAndUnsetFavourite, searchImages, upFun,uploadToStorage,deleteAllImages, generateLink, getLinkData, duplicateImages, getAllFavouriteImages, massUpload, upload} = require("../controller/imageController.js")
  const {autoShareEnabled, getShareImages, deleteImageFromYou}= require("../controller/shareController")
 const {  searchThrottle } = require("../middleware/imageMiddleWare")
 const router = express.Router()
+router.route("/mass").post(upload.array("images"),massUpload).get((req,res)=>{
+     return res.status(200).json({ mes:"Success" });
+})
 router.route("/").get(getAllImages).post(upFun,uploadToStorage,addNewImage).delete(deleteImage)
 router.route("/all").delete(deleteAllImages)
+router.route("/favourite").get(getAllFavouriteImages)
 router.route("/share").post(generateLink).get(getLinkData)
 router.route("/share/images").post(duplicateImages)
 router.route("/location").get(getAllLocations);

@@ -5,7 +5,7 @@ const Label = require("../Schema/labelSchema")
 async function getAllLabels(req, res) {
   try {
     const userId = req.body.userId || "rachit28"; // Use req.body.userId or default to "rachit28"
-    const labels = await Label.find({ userId }); // Find labels with matching userId
+    const labels = await Label.find({ userId });
     res.status(200).json(labels);
   } catch (error) {
     console.error("Error fetching labels:", error);
@@ -112,6 +112,7 @@ async function updateLabel(req, res) {
      const resData = await Label.findByIdAndUpdate(id, req.body,{new:true});
     res.status(200).json({
       message: "Success",
+      resData
     });
     console.log(id);
   } catch (error) {

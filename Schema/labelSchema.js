@@ -10,6 +10,11 @@ const labelSchema = new mongoose.Schema(
       required: true,
     },
     userId: { type: String, required: true },
+    blurredImage : {
+      type: String,
+      required:true
+    },
+    ImageUrl: String,
   },
   {
     collection: "Labels", // Specify the collection name
