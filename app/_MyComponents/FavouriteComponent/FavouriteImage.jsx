@@ -1,9 +1,10 @@
 import { cookies } from "next/headers";
 import ImageCard from "../ImageCard";
-async function PeopleImage({ name }) {
-console.log(name._id,"jjjkkjk")
+import { CloudCog } from "lucide-react";
+async function FavouriteImage() {
+
    const cookieStore = await cookies()
-   const data = await fetch(`http://localhost:2833/image?frId=${name._id}`,{
+   const data = await fetch(`http://localhost:2833/image/favourite`,{
       headers: {
          "Content-Type": "application/json",
          authorization: `Bearer ${cookieStore.get("session").value}`,
@@ -18,7 +19,7 @@ console.log(name._id,"jjjkkjk")
 
          {
             res.images?.map((item, index) => (
-               <ImageCard key={index} editSelection={true} name={name} image={item} />
+               <ImageCard key={index} editSelection={true}  image={item} />
             ))
          }
 
@@ -26,4 +27,4 @@ console.log(name._id,"jjjkkjk")
    )
 }
 
-export default PeopleImage
+export default FavouriteImage

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { loginUser,} from "../_lib/actions";
 import LoadingButton from "./LoadingButton";
 import { useRouter } from "next/navigation";
+import { CloudCog } from "lucide-react";
 
 function LoginForm() {
    const router= useRouter()
@@ -13,9 +14,11 @@ function LoginForm() {
       <Card className="w-[30rem] ">
          <form action={async (formData) => {
             const data = await loginUser(formData)
+            console.log(data)
             if (data) {
+console.log("here",data.userId)
                router.push("/");
-               localStorage.setItem("userId", data.user._id);
+               localStorage.setItem("userId", data.userId);
             }
          }}>
             <CardHeader>

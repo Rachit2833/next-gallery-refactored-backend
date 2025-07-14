@@ -14,7 +14,7 @@ function ImageWrapper({ res, cod ,left}) {
    }, [res])  // Add `res` as a dependency to avoid unnecessary effect execution
 
    return (
-      <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-2 gap-4 ">
+      <div className="grid md:grid-cols-3  sm:grid-cols-2 grid-cols-2 gap-4 ">
          {cod ? (
             <SearchGrid />
          ) : (

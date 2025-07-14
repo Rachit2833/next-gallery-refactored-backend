@@ -78,3 +78,7 @@
   font-style: normal;
   
 }
+ .bg-dot-pattern {
+    background-image: radial-gradient(white 1px, transparent 1px);
+    background-size: 20px 20px;
+  }

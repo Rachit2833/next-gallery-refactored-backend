@@ -23,14 +23,9 @@ function AddAlbumForm({ setIsOpen, }) {
    const { toast } = useToast()
    return (
 
-      <div className="w-[80%] lg:w-[40%] mx-auto">
-         <DrawerHeader >
-            <DrawerTitle className="text-center">Select Images from your Local Storage</DrawerTitle>
-            <DrawerDescription className="text-center">Description and Location can be Editable from the Input Fields Below</DrawerDescription>
-         </DrawerHeader>
-         <DrawerFooter>
-            <DrawerContent>
-               <div className="w-[80%] lg:w-[40%] mx-auto">
+      <div className="w-[80%] lg:w-[40%]  mx-auto">
+        
+        
                   <DrawerHeader>
                      <DrawerTitle className="text-center">
                         Create New Albums And Share with Family & Friends
@@ -42,8 +37,6 @@ function AddAlbumForm({ setIsOpen, }) {
                   <DrawerFooter>
                      <form action={async (formData) => {
                         try {
-
-
                            const options = {
                               weekday: "long",
                               year: "numeric",
@@ -55,7 +48,7 @@ function AddAlbumForm({ setIsOpen, }) {
                            };
                            const description = new Date().toLocaleString("en-US", options);
 
-                           const res = await (formData);
+                           const res = await createNewAlbum(formData);
 
                            if (res?.message === "Album Saved") {
                               setIsOpen(false);
@@ -116,9 +109,6 @@ function AddAlbumForm({ setIsOpen, }) {
                      </form>
                   </DrawerFooter>
                </div>
-            </DrawerContent>
-         </DrawerFooter>
-      </div>
    );
 }
 

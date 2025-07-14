@@ -1,8 +1,7 @@
-import { generateShareLink } from "@/app/_lib/actions";
 import { useUser } from "@/app/_lib/context";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Copy, Link } from "lucide-react";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Copy } from "lucide-react";
 import { useState } from "react";
 
 function LInkDialog({children,}) {
@@ -14,6 +13,7 @@ function LInkDialog({children,}) {
       });
    };
    const { isLoadingLink: isLoading, setIsLoadingLink: setIsLoading, url, setUrl }=useUser()
+   console.log(url)
    return (
       <Dialog>
          {children}

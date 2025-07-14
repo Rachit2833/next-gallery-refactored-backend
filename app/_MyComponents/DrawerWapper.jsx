@@ -11,11 +11,11 @@ import { useRouter } from "next/navigation"
 function DrawerWapper({ group,inviteId }) {
    const {toast}=useToast()
    const router = useRouter()
-   const data = group.people.map((member, i) => {
+   const data = group?.people?.map((member, i) => {
       return member._id
    })
    useEffect(()=>{
-     if(data.includes(localStorage.getItem('userId'))){
+     if(data?.includes(localStorage.getItem('userId'))){
             toast({
                           title: "Already a member of the group",
                           description: "You have already joined the group",
@@ -28,7 +28,8 @@ function DrawerWapper({ group,inviteId }) {
       router.push("/friends")
    },[])
    return (
-      !data.includes(localStorage.getItem('userId'))? <GroupDrawer group={group}  inviteId={inviteId}>
+      !data?.includes(localStorage.getItem('userId'))?
+       <GroupDrawer group={group}  inviteId={inviteId}>
          <GroupData group={group} />
       </GroupDrawer>:null
    )

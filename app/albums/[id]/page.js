@@ -32,7 +32,7 @@ async function page({ params ,searchParams }) {
             Paste your Copied Images Here Or Directly Add Images
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent >
           <Suspense key={year} fallback={<ImageLoader />}>
             <ImageCardGrid id={id} year={year} />
           </Suspense>

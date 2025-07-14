@@ -11,6 +11,7 @@ function ToggleButton() {
    };
 
    return (
+      <>
       <div className="flex items-center gap-2">
          {/* Labels for ON and OFF */}
          <span className="text-sm font-medium text-gray-700">OFF</span>
@@ -29,6 +30,7 @@ function ToggleButton() {
          {/* Labels for ON */}
          <span className="text-sm font-medium text-gray-700">ON</span>
       </div>
+      <span className='my-auto'>Details</span></>
    );
 }
 

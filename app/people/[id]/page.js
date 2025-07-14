@@ -8,6 +8,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { CloudCog } from "lucide-react";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 
@@ -22,6 +23,7 @@ async function page({ params, searchParams }) {
     },
   });
   const newRes = await res.json();
+  console.log(newRes[0],"noj")
   return (
     <>
       <div className="flex items-center">
@@ -29,11 +31,11 @@ async function page({ params, searchParams }) {
       </div>
       <Card>
         <CardHeader className="">
-          <SideProfile name={newRes[0].label} />
+          <SideProfile res={newRes[0]} />
         </CardHeader>
         <CardContent>
           <Suspense fallback={<ImageLoader />}>
-            <PeopleImage name={newRes[0]._id} />
+            <PeopleImage name={newRes[0]} />
           </Suspense>
         </CardContent>
         <CardFooter></CardFooter>
@@ -41,3 +43,4 @@ async function page({ params, searchParams }) {
     </>
   );
 }
+export default page

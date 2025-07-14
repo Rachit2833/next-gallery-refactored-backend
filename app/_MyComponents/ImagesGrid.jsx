@@ -38,7 +38,7 @@ async function ImagesGrid({ val, year, cod, frId, query,page,limit }) {
          {res?.images.length !== 0 ? (
             <>
                <ImageWrapper left={res?.leftPage} res={res?.images} cod={cod} />
-               <PasteCards query={query} res={res?.images} cod={cod} frId={frId} />
+               {/* <PasteCards query={query} res={res?.images} cod={cod} frId={frId} /> */}
             </>
          ) : (
             <NoImagesDoodle />

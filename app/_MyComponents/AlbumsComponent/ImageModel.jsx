@@ -103,7 +103,7 @@ function ImageModel() {
                   <div className="flex gap-2 text-white font-bold w-36 bg-transparent h-12 border-2 rounded-lg justify-center items-center absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
                      <span className="text-center">{imageNum + 1}</span>
                      <span className="text-center">/</span>
-                     <span className="text-center">{fetchedImages.length}</span>
+                     <span className="text-center">{fetchedImages?.length}</span>
                   </div>
 
                   {/* Image Display */}

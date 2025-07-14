@@ -7,6 +7,7 @@ import { ChevronDownCircle, ChevronRightCircle, MoveRightIcon, Search } from "lu
 import { cookies } from "next/headers"
 import LabelSelector from "./LabelSelector"
 import LabelImages from "./LabelImages"
+import React from "react"
 
 
 
@@ -41,11 +42,11 @@ async function AutoSendMenu({searchParam,children}) {
             <div className=" bg-white">
                {people.map((item,index)=>{
                   return(
-                  <>
+                  <React.Fragment key={index} >
                      <LabelSelector item={item}>
                            <LabelImages val={cookieStore.get("session").value} query={searchParam} />
                      </LabelSelector>
-                     </>
+                     </React.Fragment>
                )})}
                   
                

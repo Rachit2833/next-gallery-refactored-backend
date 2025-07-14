@@ -16,7 +16,7 @@ async function MapSideImages({search}) {
       <div className="grid grid-cols-2 gap-4">
         {data.images.map((image,i)=>{
          return (
-             <ImageCard key={i} />
+             <ImageCard key={i} image={image} />
              )})}
       </div>
    )

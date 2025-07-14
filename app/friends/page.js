@@ -1,15 +1,13 @@
+import { Suspense } from "react";
 import ChatComponent from "../_MyComponents/SearchComponents/ChatComponent";
 import MessageList from "../_MyComponents/SearchComponents/MessageList";
-import { Suspense } from "react";
 
-import IoMessages from "../_MyComponents/MessageComponets/IoMessages";
-import Content from "../_MyComponents/MessageComponets/Content";
 import { cookies } from "next/headers";
-import GroupDrawer from "../_MyComponents/SearchComponents/GroupDrawer";
-import GroupData from "../_MyComponents/SearchComponents/GroupData";
 import DrawerWapper from "../_MyComponents/DrawerWapper";
-
-async function Page({ searchParams }) {
+import Content from "../_MyComponents/MessageComponets/Content";
+import IoMessages from "../_MyComponents/MessageComponets/IoMessages";
+export const revalidate = 0;
+export default async function page({searchParams}) {
   const query = await searchParams;
   console.log(query, "hello");
   const cookieStore = await cookies();
@@ -51,3 +49,4 @@ async function Page({ searchParams }) {
     </div>
   );
 }
+

@@ -1,5 +1,5 @@
 import LoginForm from "../_MyComponents/LoginForm";
-
+export const revalidate = 0;
 
 function page() {
    return (

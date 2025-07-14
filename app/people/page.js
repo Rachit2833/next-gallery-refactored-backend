@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import Friends from "../_MyComponents/peopleComponents/Friends";
 import PeopleAvatar from "../_MyComponents/peopleComponents/PeopleAvatar";
+import PeopleAvatarFull from "../_MyComponents/peopleComponents/PeopleAvatarFull";
 
 export const revalidate = 0;
 function Page() {
@@ -22,7 +23,7 @@ function Page() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <Friends>
+          <Friends children2={<PeopleAvatarFull /> }>
             <PeopleAvatar />
           </Friends>
         </CardContent>
@@ -32,3 +33,4 @@ function Page() {
     </>
   );
 }
+export default Page

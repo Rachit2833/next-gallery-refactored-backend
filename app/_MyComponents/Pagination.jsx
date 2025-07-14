@@ -10,11 +10,14 @@ import {
    PaginationPrevious,
 } from "@/components/ui/pagination"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useUser} from "../_lib/context"
+import { CloudCog } from "lucide-react"
 
 export function PagePagination({ totalPagesLeft }) {
    const router = useRouter()
    const searchParams = useSearchParams()
    const pathname = usePathname()
+   const {selectedImages,setSelectedImages}=useUser()
 
    const currentPage = parseInt(searchParams.get("page") || "1", 10)
 
@@ -25,7 +28,7 @@ export function PagePagination({ totalPagesLeft }) {
    }
 
    return (
-      <Pagination className="sticky bottom-6">
+     selectedImages.length<=0? <Pagination className="sticky bottom-6">
          <PaginationContent className="p-3 bg-transparent border-2 rounded-xl card-shadow">
 
             {/* Previous Button */}
@@ -82,6 +85,6 @@ export function PagePagination({ totalPagesLeft }) {
             </PaginationItem>
 
          </PaginationContent>
-      </Pagination>
+      </Pagination>:null
    )
 }

@@ -1,18 +1,9 @@
 "use client";
-import imgs from "@/app/dune.jpg";
-import { Button } from "@/components/ui/button";
-import { CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Earth } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
-import { DrawerClose } from "@/components/ui/drawer";
-import { getLocationInfo, saveNewImage } from "../_lib/actions";
-import { Deletebutton } from "./ImageCard";
-import { useFormStatus } from "react-dom";
-import { useUser } from "../_lib/context";
-import { Earthbutton } from "./UploadCard";
+import { getLocationInfo } from "../_lib/actions";
 
 function getSeason() {
    const now = new Date();
@@ -31,56 +22,15 @@ function getSeason() {
    return `${season} ${year}`
 }
 
-function PasteCardDummy({ setDrawerOpen, fileInput = true,  urlBlob }) {
+function PasteCardDummy({ setDrawerOpen, fileInput = true, urlBlob }) {
    const [file, setFile] = useState();
-   const [fileBlob, setFileBlob] = useState();
-   const [lat, setLat] = useState(null);
-   const [long, setLong] = useState(null);
-   const [description, setDescription] = useState("Fall 2024");
    const [location, setLocation] = useState("Arrakis");
-   const [locationData, setLocationData] = useState(null);
-   const [isPending, setIsPending] = useState(false);
    const descriptionPlaceholder = getSeason();
-   const { addNewLabel, checkLabels, detectFaceInCapturedImage, getPeopleInImage } = useUser();
+   const abc  = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAMklEQVR4nAEnANj/AAwNOwENPwEAMQQDNwD+///L2eTO2ub+//8A/v395ejt5enu/v39Q/QXhr/juNAAAAAASUVORK5CYII="
 
-   async function urlToBlob(url) {
-      try {
-         // Fetch the file from the URL
-         const response = await fetch(url);
-         if (!response.ok) {
-            throw new Error(`Failed to fetch file: ${response.statusText}`);
-         }
-
-         // Convert the response to a Blob
-         const blob = await response.blob();
-         return blob; // Return the Blob
-      } catch (error) {
-         console.error("Error converting URL to Blob:", error);
-      }
-   }
 
    const handleLocationBlur = (e) => {
       setLocation(e.target.value); // Update the state with value
-   };
-
-   // async function onSubmit() {
-   //    const result = await detectFaceInCapturedImage(fileInput ? file : urlBlob);
-   //    const formData = new FormData();
-   //    if (fileInput) {
-   //       formData.append("photo", fileBlob)
-   //    } else {
-   //       const abc = await urlToBlob(urlBlob)
-   //       formData.append("photo", abc)
-   //    }
-   //    formData.append("LocationName", location);
-   //    formData.append("Country", "India");
-   //    formData.append("People", JSON.stringify(result));
-   //    saveNewImage(formData);
-   //    setDrawerOpen(false);
-   // }
-
-   const handleDescriptionBlur = (e) => {
-      setDescription(e.target.value); // Update the state with innerText
    };
 
    function getCoordinates(e) {
@@ -97,8 +47,6 @@ function PasteCardDummy({ setDrawerOpen, fileInput = true,  urlBlob }) {
             formData.append("location", location);
             formData.append("latitude", position.coords.latitude);
             formData.append("longitude", position.coords.longitude);
-            formData.append("description", description);
-
             const res = await getLocationInfo(formData);
             setLocation(`${res.city}, ${res.country}`);
             setLocationData({
@@ -117,38 +65,41 @@ function PasteCardDummy({ setDrawerOpen, fileInput = true,  urlBlob }) {
    return (
       <>
          <div className="mx-auto bg-[#f6f3f6] rounded-lg shadow-md md:p-4 p-2 m-2 w-full max-w-xs lg:max-w-sm">
-            <div className="bg-gray-200 rounded-t-lg cursor-pointer">
-               <Image
-                  width={352}
-                  height={0}
-                  src={fileInput && file ? file : urlBlob || imgs}
-                  alt="Placeholder"
-                  className="w-full h-[15rem] object-cover rounded-t-lg"
-               />
-            </div>
+         <div
+                     style={{
+                        backgroundImage: `url(${abc})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                     }}
+                     className="relative select-none w-full lg:h-[15rem]  sm:h-[12rem] h-[8rem] rounded-t-lg cursor-pointer overflow-hidden"
+                  >
+                     <Image
+                        src={urlBlob}
+                        alt="Placeholder"
+                        fill
+                        objectFit="contain"
+                        className="rounded-t-lg "
+                        quality={10}
+                     />
+                  </div>
+         
             <div className="max-h-24 mt-2">
                {/* Wrap the form around the inputs and submit button */}
                <form className="grid grid-cols-6 gap-4" onSubmit={getCoordinates}>
                   <Input
-                     className="col-span-5 h-6 border-none"
+                     className="heading cursor-pointer h-8 !text-[1.25rem] focus:outline-none focus:ring-0 focus:border-transparent"
                      name="LocationName"
-                     onChange={handleLocationBlur}
+                     readOnly
                      value={location}
                   />
-                  {!isPending ? (
-                     <Earthbutton />
-                  ) : (
-                     <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin"></div>
-                  )}
                </form>
 
                <Input
                   name="Description"
-                  onChange={handleDescriptionBlur}
-                  className="heading cursor-pointer h-8 !text-[1.25rem]"
-                  value={description}
+                  readOnly
+                  value={descriptionPlaceholder}
+                  className="heading cursor-pointer h-8 !text-[1.25rem] focus:outline-none focus:ring-0 focus:border-transparent"
                />
-
                <div className="text-xs text-gray-500 mt-4 sm:block hidden">
                   By{" "}
                   <span className="font-semibold hover:cursor-pointer">

@@ -5,7 +5,7 @@ import MapWrapper from "../_MyComponents/MapComponents/MapWrapper";
 import SideFilterLayout from "../_MyComponents/SideFilterLayout";
 
 export const revalidate = 0;
-async function page({ searchParams }) {
+export default async function page({searchParams}) {
   const cookieStore = await cookies();
   let searchURLParams = await searchParams;
   const res = await fetch(

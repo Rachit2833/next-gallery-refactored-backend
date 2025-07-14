@@ -5,7 +5,7 @@ import image2 from "@/app/image3.jpeg";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { CloudCog } from "lucide-react";
-async function PeopleAvatar() {
+async function PeopleAvatarFull() {
     const abc = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAMklEQVR4nAEnANj/AAwNOwENPwEAMQQDNwD+///L2eTO2ub+//8A/v395ejt5enu/v39Q/QXhr/juNAAAAAASUVORK5CYII="
    const cookieStore = await cookies()
    const response = await fetch("http://localhost:2833/labels", {
@@ -15,10 +15,10 @@ async function PeopleAvatar() {
       },
    });
    const people = await response.json();
-   console.log(people,"12142434")
+   console.log(people)
    return (
       <>
-         {people?.slice(0, 5).map((img, i) => {
+         {people?.map((img, i) => {
             return <div key={i} className="flex flex-col items-center">
                <Link href={`/people/${img._id}`}>
                   <Avatar
@@ -44,4 +44,4 @@ async function PeopleAvatar() {
    )
 }
 
-export default PeopleAvatar
+export default PeopleAvatarFull

@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Archive, ChevronRight, Delete, Heart, Share2, Trash, Trash2 } from "lucide-react"
+import { Archive, ChevronRight, CloudCog, Delete, Heart, Share2, Trash, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import image from "@/app/dune.jpg";
@@ -20,7 +20,7 @@ import { useFormStatus } from "react-dom"
 function AlbumCard({item,shared}) {
    const [isOpen, setIsOpen] = useState(false);
    const { isLoadingLink: isLoading, setIsLoadingLink: setIsLoading, selectedImages, url, setUrl, isTest, setIsTest,userID }=useUser()
-   
+      const abc = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAMklEQVR4nAEnANj/AAwNOwENPwEAMQQDNwD+///L2eTO2ub+//8A/v395ejt5enu/v39Q/QXhr/juNAAAAAASUVORK5CYII="
    const router = useRouter()
    const pathname = usePathname()
    const searchParams = useSearchParams()
@@ -53,6 +53,7 @@ function AlbumCard({item,shared}) {
             alt="Dune"
             layout="fill"
             objectFit="cover"
+            placeholder={item.blurredImage||abc}
          />
 
          <div className="  absolute flex flex-row items-center justify-center gap-4 z-20 bottom-6 sm:bottom-12 right-4 sm:right-8">
@@ -87,16 +88,17 @@ function AlbumCard({item,shared}) {
                         className=" rounded-md h-9 px-4 py-2 flex items-center p-2 sm:p-4 bg-transparent border-2 border-white text-white text-[0.9rem] sm:text-[1rem] hover:bg-white hover:text-black transition-colors"
                         onClick={async () => {
                            setIsLoading(true);
-
-                           console.log(item._id, userID?.user?.id,);
-                           const res = await generateShareLinkAlbum(item._id,userID?.user?.id );
+                           const res = await generateShareLinkAlbum(item._id,localStorage.getItem("userId") );
+                           console.log(res)
                            console.log(res,"a");
                            setUrl(res);
                            setIsLoading(false);
                         }}
                      >
                         <Share2 />
-                     </DialogTrigger></LInkDialog></> : 
+                     </DialogTrigger>
+                     </LInkDialog>
+                     </> : 
                      <form action={async () => {
    try {
       delete item._id;

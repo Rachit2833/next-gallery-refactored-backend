@@ -2,11 +2,17 @@
 import { usePathname } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import Link from "next/link";
-import { Album, Camera, Heart, Home, Map, Search, Settings, Users, } from "lucide-react";
+import { Album, Camera, CloudCog, Heart, Home, Map, Search, Settings, Users, } from "lucide-react";
+import { useUser } from '../_lib/context';
+import { useEffect } from 'react';
 
 function NavBar() {
    const pathname = usePathname();
-   
+   const {userID, setUserId}=useUser()
+   useEffect(()=>{
+     console.log(localStorage.getItem('userId'),"running")
+     setUserId(localStorage.getItem('userId'))
+   },[])
    const navigationItems = [
       {
          name: "Albums",
@@ -42,7 +48,7 @@ function NavBar() {
 
    const currentPath = usePathname(); // Get current route
    return (
-      pathname === "/login" || pathname === "/sign-up" ? null : <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+      pathname === "/login" || pathname === "/sign-up" | pathname === "/not-found" ? null : <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
          <nav className="flex flex-col items-center gap-4 px-2 py-4">
             <Link
                href="/"
