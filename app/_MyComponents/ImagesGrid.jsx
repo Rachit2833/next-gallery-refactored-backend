@@ -4,8 +4,8 @@ import NoImagesDoodle from "./NoImagesDoodle";
 import { PagePagination } from "./Pagination";
 import ImageWrapper from "./ImageWrapper";
 
-async function ImagesGrid({ val, year, cod, frId, query,page,limit }) {
-   const id = val.valid ? val.user.id : null;
+async function ImagesGrid({ year, cod, frId, query,page,limit }) {
+
    const params = new URLSearchParams();
    const cookieStore = await cookies();
  

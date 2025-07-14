@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { changeLabel } from "@/app/_lib/actions";
 import { useUser } from "@/app/_lib/context";
-import { SubmitButton } from "./LeaveDialog";
+import { SubmitButton } from "../SearchComponents/LeaveDialog";
 
 function LabelImages({ val}) {
    const { isOpen, setIsOpen } = useUser()

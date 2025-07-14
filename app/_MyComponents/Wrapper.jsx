@@ -5,7 +5,8 @@ import SideFilterLayout from "./SideFilterLayout"
 import { useUser } from "../_lib/context"
 import { useEffect } from "react"
 
-function Wrapper({alc, card, searchYear,val }) {
+function Wrapper({alc, card, searchYear, }) {
+   const val = localStorage.getItem("userId")
    const { userID, setUserId } = useUser()
    useEffect(() => {
       if (val) {

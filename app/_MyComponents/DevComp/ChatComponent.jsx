@@ -3,9 +3,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { DialogTrigger } from "@/components/ui/dialog";
 import { cookies } from "next/headers";
-import ChatHeader from "../MessageComponets/ChatHeader";
-import MessageForm from "../MessageComponets/MessageForm";
-import SocketWrapper from "../peopleComponents/SocketWrapper";
+import ChatHeader from "./ChatHeader";
+import MessageForm from "./MessageForm";
+import SocketWrapper from "./SocketWrapper";
 import AutoSendMenu from "./AutoSendMenu";
 import ContentWrapper from "./ContentWrapper";
 

@@ -3,7 +3,7 @@ import { PlusCircle } from "lucide-react";
 import { Suspense } from "react";
 import SeachBar from "../SeachBar";
 import FriendList from "../peopleComponents/FriendList";
-import AddPeopleFolder from "./AddPeopleFolder";
+import AddPeopleFolder from "../SearchComponents/AddPeopleFolder";
 import { cookies } from "next/headers";
 
 async function MessageList({ query,decodedValue }) {

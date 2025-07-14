@@ -1,7 +1,7 @@
 'use client'
 import { useEffect } from "react"
-import GroupData from "./SearchComponents/GroupData"
-import GroupDrawer from "./SearchComponents/GroupDrawer"
+import GroupData from "./GroupData"
+import GroupDrawer from "./GroupDrawer"
 import { useToast } from "@/hooks/use-toast"
 import { ToastAction } from "@/components/ui/toast"
 import { useRouter } from "next/navigation"

@@ -1,10 +1,10 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Suspense } from "react";
-import ChatHeader from "../MessageComponets/ChatHeader";
-import Content from "../MessageComponets/Content";
-import IoMessages from "../MessageComponets/IoMessages";
-import MessageForm from "../MessageComponets/MessageForm";
+import ChatHeader from "../DevComp/ChatHeader";
+import Content from "../DevComp/Content";
+import IoMessages from "../DevComp/IoMessages";
+import MessageForm from "../DevComp/MessageForm";
 function ChatWrapper() {
    return (
       <Card className="h-full flex flex-col col-span-2 overflow-hidden">

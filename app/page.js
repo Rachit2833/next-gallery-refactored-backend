@@ -12,27 +12,12 @@ export const description =
 
 export default async function page({searchParams}) {
    let searchFilter= await searchParams
-  const cookieStore= await cookies()
-  const sessionToken= cookieStore.get("session").value;
-  const verifyUserResponse = await fetch(
-    "http://localhost:2833/user/verify-user",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: `Bearer ${sessionToken}`,
-      },
-    }
-  );
-  const decodedValue = await verifyUserResponse.json();
   return (
     <Wrapper
-      val={decodedValue}
       alc={<AlbumList />}
       searchYear={searchFilter.year}
       card={
         <ImagesGrid
-          val={decodedValue}
           page={searchFilter.page}
           limit={searchFilter.limit}
           query={searchFilter.query}
