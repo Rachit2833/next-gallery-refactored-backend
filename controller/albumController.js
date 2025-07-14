@@ -1,6 +1,7 @@
 const  mongoose  = require("mongoose");
 const Album = require("../Schema/albumSchema");
 const SharedLink = require("../Schema/sharedLink");
+const { albumQueue } = require("../lib/blur-queue");
 
 
 async function getAllAlbum(req, res) {
@@ -30,14 +31,25 @@ async function getAllAlbum(req, res) {
 }
 async function addNewAlbum(req, res) {
   try {  
-    const { getImageBlurred } = await import("../lib/util.mjs");
-    req.body.blurredImage = await getImageBlurred(req.body.ImageUrl);
-    const newAlbum = new Album(req.body); // Use req.body instead of req.data
-    const album = await newAlbum.save();
+    // const { getImageBlurred } = await import("../lib/util.mjs");
+    // req.body.blurredImage = await getImageBlurred(req.body.ImageUrl);
+    // const newAlbum = new Album(req.body); // Use req.body instead of req.data
+    // const album = await newAlbum.save();
+    
+    const Name = req.body.Name || "";
+    const Description = req.body.Description || "";
+    const image = req.files[0]
+    albumQueue.add("Add-Album",{
+      image,
+      meta:{
+        Name,Description
+      }
+    })
     res.status(200).json({
       message: "Album Saved",
-      data: album,
+      // data: album,
     });
+
   } catch (error) {
     console.error(error);
     res.status(400).json({
