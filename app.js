@@ -4,7 +4,6 @@ const imageRouter= require("./routes/imageRoutes")
 const albumRouter= require("./routes/albumRoutes")
 const statsRouter= require('./routes/statsRouter')
 const userRouter = require('./routes/usersRoutes')
-const messageRouter = require('./routes/messageRoutes')
 const authRouter = require('./routes/authRouter')
 const friendRouter = require('./routes/friendRouter')
 const cors = require("cors");
@@ -28,7 +27,6 @@ app.use("/user",userRouter );
 app.use("/image", imageRouter);
 app.use("/album", albumRouter);
 app.use("/stats", statsRouter);
-app.use("/message",messageRouter);
 app.use("/login", authRouter);
 app.use("/friends",friendRouter);
 
