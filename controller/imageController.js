@@ -139,6 +139,7 @@ async function massUpload(req, res) {
         },
       }))
     );
+    console.log("added ");
 
     return res.status(200).json({
       message: "Images uploaded successfully",
