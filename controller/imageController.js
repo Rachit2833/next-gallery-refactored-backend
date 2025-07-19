@@ -6,7 +6,7 @@ const multer = require("multer");
 const uploadFile = require("../upload");
 const { json } = require("body-parser");
 const { blurQueue, uploadQueue } = require("../lib/blur-queue");
-
+const { createClient } = require("redis");
 
 
 const storage = multer.memoryStorage();
@@ -96,28 +96,27 @@ async function getAllImages(req, res) {
     });
   }
 }
+
+const pub = createClient({ url: process.env.REDIS_URL });
+pub.connect(); // Ideally move this outside for global reuse
+
 async function massUpload(req, res) {
   try {
-    console.log("📦 Uploaded Files:", req.files);     // Uploaded image files
-    console.log("📝 Form Fields:", req.body);         // Other form fields
+    console.log("📦 Uploaded Files:", req.files);
+    console.log("📝 Form Fields:", req.body);
 
-    // Extract fields from the form
     const location = req.body.LocationName || "";
     const description = req.body.Description || "";
     const country = req.body.Country || "";
     const favourite = req.body.Favourite === "true";
     const people = JSON.parse(req.body.People || "[]");
-    const detection=req.body.detection
-    console.log(detection);
-
+    const detection = req.body.detection;
     const name = "UploadJob";
 
-    // Ensure req.files is an array
     if (!Array.isArray(req.files) || req.files.length === 0) {
       return res.status(400).json({ error: "No images uploaded" });
     }
 
-    // Add a job to the queue for each image
     const jobs = await uploadQueue.addBulk(
       req.files.map((file) => ({
         name,
@@ -125,8 +124,7 @@ async function massUpload(req, res) {
           image: {
             originalname: file.originalname,
             mimetype: file.mimetype,
-            buffer:file.buffer,
-
+            buffer: file.buffer,
           },
           meta: {
             location,
@@ -134,12 +132,15 @@ async function massUpload(req, res) {
             country,
             favourite,
             people,
-            detection
+            detection,
           },
         },
       }))
     );
-    console.log("added ");
+
+    // 🔔 Trigger worker
+    await pub.publish("trigger-upload-worker", "run");
+    console.log("📡 Worker triggered");
 
     return res.status(200).json({
       message: "Images uploaded successfully",
@@ -156,6 +157,7 @@ async function massUpload(req, res) {
     return res.status(500).json({ error: "Failed to process upload" });
   }
 }
+
 
 
 
