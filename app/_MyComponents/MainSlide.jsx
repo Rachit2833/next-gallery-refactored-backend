@@ -8,7 +8,7 @@ import { useUser } from "../_lib/context";
 
 
 
-function MainSlide({ val, albumComponent,searchYear,card}) {
+function MainSlide({ val, albumComponent,searchYear,card,page}) {
 const {selectedImages,  } = useUser();
    return (
 <>
@@ -23,7 +23,7 @@ const {selectedImages,  } = useUser();
                   </CardDescription>
                </CardHeader>
                <CardContent>
-                  <Suspense fallback={<ImageLoader />}>
+                  <Suspense key={[searchYear,page]} fallback={<ImageLoader />}>
 
                   {card}
                   </Suspense>

@@ -3,7 +3,8 @@ import AlbumCard from "./AlbumCard";
 
 async function AlbumGrid({year}) {
    const cookieStore = await cookies()
-   const res = await fetch(`http://localhost:2833/album?year=${year||"all"}`,{
+   const res = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/album?year=${year||"all"}`,{
+      next: { revalidate: 60 },
       headers: {
          "Content-Type": "application/json",
          authorization: `Bearer ${cookieStore.get("session").value}`,

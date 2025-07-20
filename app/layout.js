@@ -1,22 +1,14 @@
 
 import "./global.css";
-import SideSheet from "./_MyComponents/SideSheet";
 export const metadata = {
   title: "PWA-Gallery",
   description: "A New Ai Gallery to Manage All your Favourite Memories",
 };
-
 import ImageModel from "./_MyComponents/AlbumsComponent/ImageModel";
-import Filter from "./_MyComponents/Filter";
-import NavBar from "./_MyComponents/NavBar";
-import SideFilterLayout from "./_MyComponents/SideFilterLayout";
-import { UserProvider } from "./_lib/context";
-import { cookies } from "next/headers";
-import { Toaster } from "@/components/ui/toaster"; 
 import LayoutWrapper from "./_MyComponents/LayoutWrapper";
+import { UserProvider } from "./_lib/context";
 
-export default async function RootLayout({ children,}) {
-  
+export default  function RootLayout({ children}) {
   return (
     <html lang="en">
       <head>

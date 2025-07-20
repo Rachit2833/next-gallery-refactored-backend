@@ -10,8 +10,9 @@ import { Suspense } from "react";
 
 async function page({ params ,searchParams }) {
   const { id }= await params
-  let year= await searchParams
-  year=year.year
+  let paramval= await searchParams
+  let year=paramval.year
+  let sort=paramval.sort
    function handleParams(filter) {
      if (!searchParams) return; // Ensure searchParams are loaded
 
@@ -33,7 +34,7 @@ async function page({ params ,searchParams }) {
           </CardDescription>
         </CardHeader>
         <CardContent >
-          <Suspense key={year} fallback={<ImageLoader />}>
+          <Suspense key={[year, sort]} fallback={<ImageLoader />}>
             <ImageCardGrid id={id} year={year} />
           </Suspense>
         </CardContent>

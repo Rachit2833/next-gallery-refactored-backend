@@ -31,7 +31,7 @@ function FriendListWrapper({ res, isSelected, grpData, userId }) {
          try {
 
             const response = await fetch(
-               `http://localhost:2833/user/searchPeople?_id=${userId}&query=${isInputing}`,
+               `https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/user/searchPeople?_id=${userId}&query=${isInputing}`,
                { headers: { "Content-Type": "application/json" } }
             );
 

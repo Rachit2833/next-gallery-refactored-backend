@@ -159,9 +159,11 @@ export async function updateFavourite(formData) {
       },
       body: JSON.stringify({ Favourite: !favValue }), // Negating correctly
     });
+  const response = await data.json();
 
     // Check if the request was successful
     if (!data.ok) {
+      console.log(response, "data");
       throw new Error("Failed to update favourite");
     }
 
@@ -780,7 +782,7 @@ export async function saveMassImages(formData) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("session")?.value;
-
+    console.log(formData);
     const res = await fetch("http://localhost:2833/image/mass", {
       method: "POST",
       headers: {
@@ -789,14 +791,15 @@ export async function saveMassImages(formData) {
       },
       body: formData,
     });
+    const data =  await res.json()
+    console.log(data,"hejhrweo");
 
     if (!res.ok) {
       const errText = await res.text();
       console.error("Server response:", errText);
       throw new Error(`Upload failed: ${res.statusText}`);
     }
-    const data =  await res.json()
-    console.log(data);
+    
  
     console.log("Upload successful");
   } catch (error) {

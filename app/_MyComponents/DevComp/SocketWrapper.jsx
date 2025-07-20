@@ -9,7 +9,7 @@ function SocketWrapper({ joinedGroup}) {
 
    useEffect(() => {
 
-      const socket = io("http://localhost:2833", { query: { userId: currentUserId } });
+      const socket = io("https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app", { query: { userId: currentUserId } });
       setSocket(socket);
 
       socket.on("connect", () => console.log("Connected with socket id:", socket.id));

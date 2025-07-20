@@ -39,7 +39,7 @@ export const UserProvider = ({ children }) => {
   const contentRef = useRef();
 
   const addNewLabel = async (data) => {
-    const res = await fetch('http://localhost:2833/labels', {
+    const res = await fetch('https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/labels', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
@@ -51,7 +51,7 @@ export const UserProvider = ({ children }) => {
 
   const checkLabels = async () => {
     const identifiers = [];
-    const response = await fetch("http://localhost:2833/labels");
+    const response = await fetch("https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/labels");
     const storedDescriptors = await response.json();
     console.log("Stored Descriptors:", storedDescriptors);
 
@@ -117,7 +117,7 @@ export const UserProvider = ({ children }) => {
             console.log("detect known", bestMatch);
             try {
               const labelResponse = await fetch(
-                `http://localhost:2833/labels/${bestMatch._label}`
+                `https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/labels/${bestMatch._label}`
               );
               if (!labelResponse.ok) {
                 console.error("Error fetching label:", labelResponse.statusText);

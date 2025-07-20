@@ -19,7 +19,7 @@ function Content({ sessionToken, decodedValue }) {
       try {
         const userId = decodedValue.user.id;
         const res = await fetch(
-          `http://localhost:2833/message?_id=${userId}&selectedID=${isSelected._id}`,
+          `https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/message?_id=${userId}&selectedID=${isSelected._id}`,
           {
             headers: {
               "Content-Type": "application/json",

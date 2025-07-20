@@ -5,7 +5,7 @@ import SideFilterLayout from "./SideFilterLayout"
 import { useUser } from "../_lib/context"
 import { useEffect } from "react"
 
-function Wrapper({alc, card, searchYear, }) {
+function Wrapper({alc, card, searchYear,page }) {
    const val = localStorage.getItem("userId")
    const { userID, setUserId } = useUser()
    useEffect(() => {
@@ -14,23 +14,13 @@ function Wrapper({alc, card, searchYear, }) {
          setUserId(val);
       }
    }, [val, setUserId]);
-   useEffect
-   const faceRecognizer = async () => {
-      await faceapi.nets.tinyFaceDetector.loadFromUri('/weights');
-      await faceapi.nets.faceLandmark68Net.loadFromUri('/weights');
-      await faceapi.nets.faceRecognitionNet.loadFromUri('/weights');
-      await faceapi.nets.faceExpressionNet.loadFromUri('/weights');
-      await faceapi.nets.ssdMobilenetv1.loadFromUri('/weights');
-   };
-
-   faceRecognizer()
    return (
         <>
          <div className="flex items-center">
 
             <SideFilterLayout text="Add Images" year={searchYear} />
          </div>
-         <MainSlide  val={val} albumComponent={alc}  searchYear={searchYear} card={card}  />
+         <MainSlide  val={val} albumComponent={alc} page={page}  searchYear={searchYear} card={card}  />
        
 
          </>

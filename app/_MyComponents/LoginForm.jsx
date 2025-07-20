@@ -16,7 +16,6 @@ function LoginForm() {
             const data = await loginUser(formData)
             console.log(data)
             if (data) {
-console.log("here",data.userId)
                router.push("/");
                localStorage.setItem("userId", data.userId);
             }

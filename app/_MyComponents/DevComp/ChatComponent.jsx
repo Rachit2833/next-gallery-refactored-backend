@@ -13,13 +13,13 @@ async function ChatComponent({ children,query,decodedValue }) {
 
   const cookieStore = await cookies()
   
-  const res = await fetch(`http://localhost:2833/message/group?_id=${decodedValue.user.id}`, {headers: {
+  const res = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/message/group?_id=${decodedValue.user.id}`, {headers: {
     "Content-Type": "application/json",
     authorization: `Bearer ${cookieStore.get("session").value}`,
   }
 },)
   const data =await res.json()
-  let user = await fetch(`http://localhost:2833/user/searchPeople?query=${query.search || ""}&_id=${'67cda33a43ec8895eaaaa2ab'}`,{
+  let user = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/user/searchPeople?query=${query.search || ""}&_id=${'67cda33a43ec8895eaaaa2ab'}`,{
     headers: {
       "Content-Type": "application/json",
       authorization: `Bearer ${cookieStore.get("session").value}`,
@@ -30,7 +30,7 @@ async function ChatComponent({ children,query,decodedValue }) {
   
   const arrId=[]
   data.forEach((e)=>arrId.push(e._id))
-  const response = await fetch("http://localhost:2833/labels", {
+  const response = await fetch("https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/labels", {
     headers: {
       "Content-Type": "application/json",
       authorization: `Bearer ${cookieStore.get("session").value}`,

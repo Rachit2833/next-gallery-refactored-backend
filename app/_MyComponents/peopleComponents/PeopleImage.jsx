@@ -3,7 +3,7 @@ import ImageCard from "../ImageCard";
 async function PeopleImage({ name }) {
 console.log(name._id,"jjjkkjk")
    const cookieStore = await cookies()
-   const data = await fetch(`http://localhost:2833/image?frId=${name._id}`,{
+   const data = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image?frId=${name._id}`,{
       headers: {
          "Content-Type": "application/json",
          authorization: `Bearer ${cookieStore.get("session").value}`,

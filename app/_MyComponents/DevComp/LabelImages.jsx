@@ -53,7 +53,7 @@ function LabelImages({ val}) {
    ];
 
 
-   const url = `http://localhost:2833/image?frId=${isOpen}`;
+   const url = `https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image?frId=${isOpen}`;
 
 
    useEffect(() => {

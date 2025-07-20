@@ -13,7 +13,7 @@ import React from "react"
 
 async function AutoSendMenu({searchParam,children}) {
    const cookieStore = cookies()
-   const response = await fetch("http://localhost:2833/labels", {
+   const response = await fetch("https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/labels", {
       headers: {
          "Content-Type": "application/json",
           authorization: `Bearer ${cookieStore.get("session").value}`,

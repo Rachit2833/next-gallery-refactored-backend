@@ -11,7 +11,7 @@ async function MessageList({ query,decodedValue }) {
    const sessionToken = cookieStore.get("session")?.value;
    const userId = decodedValue?.user?.id;
 
-   const searchPeopleResponse = await fetch(`http://localhost:2833/friends?id=${userId}`, {
+   const searchPeopleResponse = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/friends?id=${userId}`, {
       headers: {
          "Content-Type": "application/json",
          authorization: `Bearer ${sessionToken}`,
@@ -20,7 +20,7 @@ async function MessageList({ query,decodedValue }) {
 
    const searchResults = await searchPeopleResponse.json();
    console.log(searchResults,"sfs");
-   const groupResponse = await fetch(`http://localhost:2833/message/group?_id=${userId}`, {
+   const groupResponse = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/message/group?_id=${userId}`, {
       headers: {
          "Content-Type": "application/json",
          authorization: `Bearer ${sessionToken}`,

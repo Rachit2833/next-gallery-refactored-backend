@@ -1,50 +1,54 @@
-"use client"
-import { Button } from "@/components/ui/button";
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 
-function Filter({values,paramName,defaultValue,year}) {
-   console.log(year, "Dgi", !year);
-   const searchParams = useSearchParams()
-   const pathname = usePathname()
-   const router = useRouter()
-   const [activeFilter,setActiveFilter]=useState(year||defaultValue)
-   useEffect(()=>{
-     if(!year){
+function Filter({ values, paramName, defaultValue, year }) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
 
-        handleParams("All")
-     }
-   },[])
-   function handleParams(filter) {
-      if (!searchParams) return;
-      const params = new URLSearchParams(searchParams);
-      params.set(paramName, filter);
-      router.replace(`${pathname}?${params}`, { scroll: false });
-   }
-   return (
-      <>
-         {values.map((item, i) => {
-            const isActive = year==="All"? item.value===year :  Number(item.value) === Number(activeFilter); 
-            return (
-               <Button
-                  size="sm"
-                  className={`${isActive ? "bg-black text-white" : "bg-white text-black"
-                     } hover:text-white hover:bg-black`}
-                  key={i}
-                  onClick={() => {
-                     handleParams(item.value);
-                     setActiveFilter(item.value);
-                  }}
-               >
-                  {item.label}
-               </Button>
-            );
-         })}
-      </>
-   );
+  const [activeFilter, setActiveFilter] = useState(null);
+
+
+  useEffect(() => {
+    setActiveFilter(year || defaultValue);
+  }, [year, defaultValue]);
+
+  const handleParams = (filterValue) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(paramName, filterValue);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  return (
+    <>
+      {values.map((item, i) => {
+        const isActive = String(item.value) === String(activeFilter);
+
+        return (
+          <Button
+            key={i}
+            size="sm"
+            className={`${
+              isActive
+                ? "bg-black text-white"
+                : "bg-white text-black hover:bg-black hover:text-white"
+            }`}
+            onClick={() => {
+              handleParams(item.value);
+              setActiveFilter(item.value);
+            }}
+          >
+            {item.label}
+          </Button>
+        );
+      })}
+    </>
+  );
 }
 
-export default Filter
+export default Filter;
 

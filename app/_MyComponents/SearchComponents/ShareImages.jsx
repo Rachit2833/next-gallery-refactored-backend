@@ -10,7 +10,7 @@ import SharedButtons from "./SharedButtons"
 
 
 async function ShareImages({ params }) {
-   const res = await fetch(`http://localhost:2833/image/share?id=${params.id}`) 
+   const res = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image/share?id=${params.id}`) 
    const data = await res.json()
    return (
       data.data ?

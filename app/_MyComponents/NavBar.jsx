@@ -1,16 +1,16 @@
 "use client"
-import { usePathname } from 'next/navigation';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Album, Camera, Heart, Home, Map, Settings, Users } from "lucide-react";
 import Link from "next/link";
-import { Album, Camera, CloudCog, Heart, Home, Map, Search, Settings, Users, } from "lucide-react";
-import { useUser } from '../_lib/context';
+import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
+import { useUser } from '../_lib/context';
 
 function NavBar() {
    const pathname = usePathname();
    const {userID, setUserId}=useUser()
    useEffect(()=>{
-     console.log(localStorage.getItem('userId'),"running")
+     console.log("running")
      setUserId(localStorage.getItem('userId'))
    },[])
    const navigationItems = [
@@ -18,11 +18,6 @@ function NavBar() {
          name: "Albums",
          icon: Album, // Directly reference the icon component
          href: "/albums",
-      },
-      {
-         name: "Friends",
-         icon: Search, // Directly reference the icon component
-         href: "/friends",
       },
       {
          name: "People & Sharing",

@@ -1,55 +1,65 @@
 import { NextResponse } from "next/server";
 
 export async function middleware(req) {
-  console.log("Middleware executed");
-  const token = req.cookies.get("session")?.value; 
+  const token = req.cookies.get("session")?.value;
   const { pathname } = req.nextUrl;
-  if(!token && (pathname==="/login"||pathname==="/sign-up")){
-    return NextResponse.next()
-  }
-  if (!token) {
-    console.log("No token found, redirecting to /login");
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
 
-  try {
-    const authResponse = await fetch("http://localhost:2833/user/verify-user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // Manually attach token
-      },
-    });
+  console.log("Middleware executed:", pathname);
 
-    if (!authResponse.ok) {
+  // ✅ If token exists, verify it first
+  if (token) {
+    try {
+      const authResponse = await fetch("https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/user/verify-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // ✅ If token is valid
+      if (authResponse.ok) {
+        // Redirect logged-in user away from /login and /sign-up
+        if (pathname === "/login" || pathname === "/sign-up") {
+          console.log("Authenticated user trying to access auth page. Redirecting to /");
+          return NextResponse.redirect(new URL("/", req.url));
+        }
+
+        return NextResponse.next(); // allow access to protected routes
+      }
+
+      // 🔴 Invalid token — redirect to login
       console.log("Invalid token, redirecting to /login");
       return NextResponse.redirect(new URL("/login", req.url));
+
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      return NextResponse.redirect(new URL("/login", req.url));
     }
+  }
 
-    const data = await authResponse.json();
-
-    if(pathname==="/sign-up"||pathname==="/login"&& token){
-      return NextResponse.redirect(new URL("/", req.url));
-
-    }
-    return NextResponse.next();
-  } catch (error) {
-    console.log("Error verifying token:", error);
+  // 🔴 No token
+  if (pathname !== "/login" && pathname !== "/sign-up") {
+    console.log("No token and trying to access protected route. Redirecting to /login");
     return NextResponse.redirect(new URL("/login", req.url));
   }
+
+  // ✅ No token, but accessing public route (login or sign-up)
+  return NextResponse.next();
 }
 
-// Apply middleware to all routes except login and sign-up
+
+// ✅ Apply middleware only to protected routes (exclude /login and /sign-up)
 export const config = {
   matcher: [
-    "/",
+    "/",               
     "/albums",
     "/friends",
     "/people",
     "/favourites",
     "/memory-map",
     "/post",
+    "/login",
     "/sign-up",
-    "/login"
-  ], // Apply to all routes
+  ],
 };

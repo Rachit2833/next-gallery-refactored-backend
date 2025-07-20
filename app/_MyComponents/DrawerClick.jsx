@@ -79,6 +79,7 @@ const handleSave = async () => {
   formData.append("Description", globalDescription || "No description provided");
   formData.append("Country", "India");
   formData.append("Favourite", "false");
+  formData.append("detection", "true");
 
   const people = []; // You can fill this as needed
   formData.append("People", JSON.stringify(people));

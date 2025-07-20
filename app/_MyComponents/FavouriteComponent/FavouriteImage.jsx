@@ -4,7 +4,7 @@ import { CloudCog } from "lucide-react";
 async function FavouriteImage() {
 
    const cookieStore = await cookies()
-   const data = await fetch(`http://localhost:2833/image/favourite`,{
+   const data = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image/favourite`,{
       headers: {
          "Content-Type": "application/json",
          authorization: `Bearer ${cookieStore.get("session").value}`,

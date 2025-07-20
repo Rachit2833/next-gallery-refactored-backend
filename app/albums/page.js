@@ -6,12 +6,14 @@ import SideFilterLayout from "../_MyComponents/SideFilterLayout";
 export const revalidate = 0;
  async function page({searchParams}) {
   const query = await searchParams
+  let year=query.year
+  let sort=query.sort
    return (
      <>
        <div className="flex items-center">
          <SideFilterLayout formType="Album" text="Add Album" year={query.year} />
        </div>
-       <Suspense fallback={<AlbumLoaders />}>
+       <Suspense key={[year, sort]} fallback={<AlbumLoaders />}>
          <AlbumGrid year={query.year} />
        </Suspense>
      </>

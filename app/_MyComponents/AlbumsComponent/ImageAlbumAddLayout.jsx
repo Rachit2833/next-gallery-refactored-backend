@@ -1,7 +1,7 @@
 import ImageCard from "../ImageCard"
 import { DrawerClose, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 function ImageAlbumAddLayout() {
-   // const url = `http://localhost:2833/image${queryString ? `?${queryString}` : ""}`
+   // const url = `https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image${queryString ? `?${queryString}` : ""}`
    // let res = await fetch(url);
    // res = await res.json();
    const res =[1,2,3]
