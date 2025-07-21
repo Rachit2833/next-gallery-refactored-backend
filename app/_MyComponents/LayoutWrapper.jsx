@@ -3,7 +3,6 @@
 import React from 'react';
 import NavBar from './NavBar';
 import SideSheet from './SideSheet';
-import { Toaster } from '@/components/ui/toaster';
 import { usePathname } from 'next/navigation';
 
 const LayoutWrapper = ({ children }) => {
@@ -22,7 +21,7 @@ const LayoutWrapper = ({ children }) => {
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <SideSheet />
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0">
-          <Toaster />
+     
           {children}
         </main>
       </div>

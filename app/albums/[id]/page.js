@@ -1,26 +1,14 @@
-import AlbumFilter from "@/app/_MyComponents/AlbumsComponent/AlbumFilter";
 import ImageCardGrid from "@/app/_MyComponents/AlbumsComponent/ImageCardGrid";
-import PasteCards from "@/app/_MyComponents/AlbumsComponent/PasteCards";
-import DrawerClick from "@/app/_MyComponents/DrawerClick";
 import ImageLoader from "@/app/_MyComponents/Loaders/ImageLoader";
 import SideFilterLayout from "@/app/_MyComponents/SideFilterLayout";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
 
 async function page({ params ,searchParams }) {
   const { id }= await params
   let paramval= await searchParams
-  let year=paramval.year
-  let sort=paramval.sort
-   function handleParams(filter) {
-     if (!searchParams) return; // Ensure searchParams are loaded
-
-     const params = new URLSearchParams(searchParams);
-     params.set("year", filter);
-
-     router.replace(`${pathname}?${params}`, { scroll: false });
-   }
+  let year=paramval.year||"All"
+  let sort=paramval.sort||-1
   return (
     <>
       <div className="flex items-center">

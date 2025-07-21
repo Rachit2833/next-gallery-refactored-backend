@@ -9,7 +9,7 @@ export default async function page({ searchParams }) {
   const params = await searchParams
   return (
     <Wrapper
-       page={searchParams.page || 1}
+       params={params}
       alc={<AlbumList />}
       searchYear={params.year}
       card={<ImagesGrid searchParams={params} />}

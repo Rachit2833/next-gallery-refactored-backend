@@ -1,7 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import Image from "next/image"
-import CountryCard from "../MapComponents/CountryCard"
 
 function MapSideOptionLoader() {
    return (

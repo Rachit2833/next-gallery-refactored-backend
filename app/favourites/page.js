@@ -7,7 +7,7 @@ async function page({searchParams}) {
     const query = await searchParams
    return (
      <Suspense fallback={<h1>Loading...</h1>}>
-       <Wrapper searchYear={query.year} card={<FavouriteImage />} />
+       <Wrapper  params={query} card={<FavouriteImage />} />
      </Suspense>
    );
 }

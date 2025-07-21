@@ -27,12 +27,6 @@ function AlbumCard({item,shared}) {
    const options = { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric", hour12: true, };
    const description = new Date().toLocaleString("en-US", options);
    const {toast}=useToast()
-   function handleParams(filter) {
-      if (!searchParams) return;
-      const params = new URLSearchParams(searchParams);
-      params.set("alb_id", filter);
-      router.replace(`${pathname}?${params}`, { scroll: false });
-   }
    async function submitDeleteForm(formData){
       await deleteAlbumAction(formData)
       setIsOpen(false)

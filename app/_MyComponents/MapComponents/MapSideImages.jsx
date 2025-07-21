@@ -3,7 +3,7 @@ import ImageCard from "../ImageCard"
 
 async function MapSideImages({search}) {
    const cookieStore = cookies()
-    let res = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image/loc?cod=${search}`,{
+    let res = await fetch(`http://localhost:2833/image/loc?cod=${search}`,{
        headers: {
           "Content-Type": "application/json",
           authorization: `Bearer ${cookieStore.get("session").value}`,

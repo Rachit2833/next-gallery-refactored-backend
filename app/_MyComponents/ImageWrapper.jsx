@@ -38,7 +38,7 @@ function ImageWrapper({ res, cod, left }) {
       ) : (
         optimisticImages?.map((item) =>
           item.sharedBy ? (
-            <SharedImageCard sharedData={item._id} key={item._id} image={item} />
+            <SharedImageCard toggleFav={toggleFav} sharedData={item._id} key={item._id} image={item} />
           ) : (
             <ImageCard toggleFav={toggleFav} key={item._id} image={item} />
           )

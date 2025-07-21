@@ -4,6 +4,7 @@ async function PeopleImage({ name }) {
 console.log(name._id,"jjjkkjk")
    const cookieStore = await cookies()
    const data = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image?frId=${name._id}`,{
+      next: { revalidate: 60 },
       headers: {
          "Content-Type": "application/json",
          authorization: `Bearer ${cookieStore.get("session").value}`,

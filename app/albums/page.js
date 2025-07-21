@@ -11,7 +11,7 @@ export const revalidate = 0;
    return (
      <>
        <div className="flex items-center">
-         <SideFilterLayout formType="Album" text="Add Album" year={query.year} />
+         <SideFilterLayout formType="Album" text="Add Album" year={query?.year||"All"} />
        </div>
        <Suspense key={[year, sort]} fallback={<AlbumLoaders />}>
          <AlbumGrid year={query.year} />

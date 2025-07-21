@@ -17,6 +17,7 @@ async function page({ params, searchParams }) {
   const cookieStore = await cookies();
   const searchParamValue = await searchParams;
   const res = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/label/${param.id}`, {
+    next: { revalidate: 60 },
     headers: {
       "Content-Type": "application/json",
       authorization: `Bearer ${cookieStore.get("session").value}`,

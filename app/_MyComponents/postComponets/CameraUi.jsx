@@ -1,5 +1,5 @@
 "use client";
-
+import * as faceapi from "@vladmandic/face-api";
 import { useUser } from "@/app/_lib/context";
 import image2 from "@/app/placeholder.webp";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import {
    DrawerTrigger,
 } from "@/components/ui/drawer";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import * as faceapi from "@vladmandic/face-api";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Uploadcard from "../UploadCard";
@@ -29,8 +28,24 @@ function CameraUi() {
    const videoRef = useRef();
    const canvasRef = useRef();
    const [detected, setDetected] = useState(false);
-   const { checkLabels } = useUser();
 
+  const checkLabels = async () => {
+    const identifiers = [];
+    const response = await fetch("https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/labels");
+    const storedDescriptors = await response.json();
+    console.log("Stored Descriptors:", storedDescriptors);
+
+    storedDescriptors.map((data, i) => {
+      const { label, descriptors,_id } = data;
+      const newLabel = `${label}/${_id}`
+      if (Array.isArray(descriptors) && descriptors.length > 0) {
+        const faceDescriptor = Float32Array.from(descriptors[0]);
+        identifiers.push(new faceapi.LabeledFaceDescriptors(newLabel, [faceDescriptor]));
+      }
+    });
+   
+    return identifiers;
+  };
    const handleCameraClose = () => {
       if (videoSrc) {
          videoSrc.getTracks().forEach((track) => track.stop());

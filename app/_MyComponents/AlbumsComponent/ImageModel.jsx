@@ -2,8 +2,8 @@
 
 import { useUser } from "@/app/_lib/context"
 import image1 from "@/app/dune.jpg"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button } from "@/components/ui/button"
-import { AspectRatio } from "@radix-ui/react-aspect-ratio"
 import Image from "next/image"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useRef } from "react"

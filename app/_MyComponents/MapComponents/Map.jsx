@@ -2,7 +2,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, } from "react-leaflet";
 import image from "./icons.png";
 import { useMemo, useState } from "react";
 
@@ -38,9 +38,10 @@ function Map({ isOpen, setIsOpen, Location,paramLoc }) {
                icon={customIcon}
                eventHandlers={{
                   click: () => {
+                        setIsOpen(true);
                         handleParams(item.name); // Update the URL after a delay
                         setActiveMarker(item.name)
-                        setIsOpen(true);
+                        
                   },
                }}
             >

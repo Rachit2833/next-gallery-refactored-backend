@@ -6,17 +6,25 @@ import { Download, ListFilter } from "lucide-react"
 import DrawerClick from "./DrawerClick"
 import Filter from "./Filter"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useUser } from "../_lib/context"
+import { saveAs } from "file-saver"
+import { useToast } from "@/hooks/use-toast";
+
+
 
 
 
 function SideFilterLayout({ year, text, formType }) {
-const router = useRouter();
-const searchParams = useSearchParams();
-function handleSortChange(value) {
-   const params = new URLSearchParams(searchParams.toString());
-   params.set("sort", value); // "-1" or "1"
-   router.push(`${pathname}?${params.toString()}`);
-}
+   const router = useRouter();
+   const { toast } = useToast()
+   const { selectedImages, setSelectedImages } = useUser();
+   const searchParams = useSearchParams();
+   function handleSortChange(value) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("sort", value); // "-1" or "1"
+      router.push(`${pathname}?${params.toString()}`);
+   }
+
    const pathname = usePathname()
    const filterArray = [
       { label: "All", value: "All" },
@@ -24,8 +32,38 @@ function handleSortChange(value) {
       { label: "2023", value: 2023 },
       { label: "2022", value: 2022 },
    ];
+   const handleDownload = async () => {
+      if (selectedImages.length <= 0) {
+         toast({
+            title: "No Images Selected",
+            description: "Please select Images to Download",
+         });
+         return
+      }
+      toast({
+         title: "Preparing download...",
+         description: "Your download will start shortly.",
+      });
+
+      selectedImages.forEach((item) => {
+         try {
+            saveAs(item?.url, Date.now().toString());
+            toast({
+               title: "Download started!",
+               description: "Your file is being downloaded.",  
+            });
+         } catch (error) {
+            toast({
+               title: "Download failed",
+               description: "There was an error starting your download.",
+            });
+         }
+      })
+   };
+
    return (
       <>
+
          {pathname !== "/memory-map" && pathname !== "/post" ?
             <>
                <Filter
@@ -48,22 +86,22 @@ function handleSortChange(value) {
                            </span>
                         </Button>
                      </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuCheckboxItem
-                        checked={searchParams.get("sort") === "1"||searchParams.get("sort") === null}
-                        onClick={() => handleSortChange("1")}
-                     >
-                        Oldest to Newest
-                     </DropdownMenuCheckboxItem>
-                     <DropdownMenuCheckboxItem
-                        checked={searchParams.get("sort") === "-1"}
-                        onClick={() => handleSortChange("-1")}
-                     >
-                        Newest to Oldest
-                     </DropdownMenuCheckboxItem>
-                    </DropdownMenuContent>
+                     <DropdownMenuContent>
+                        <DropdownMenuCheckboxItem
+                           checked={searchParams.get("sort") === "1" || searchParams.get("sort") === null}
+                           onClick={() => handleSortChange("1")}
+                        >
+                           Oldest to Newest
+                        </DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem
+                           checked={searchParams.get("sort") === "-1"}
+                           onClick={() => handleSortChange("-1")}
+                        >
+                           Newest to Oldest
+                        </DropdownMenuCheckboxItem>
+                     </DropdownMenuContent>
                   </DropdownMenu>
-                  <Button size="sm" variant="outline" className="h-7 gap-1">
+                  <Button onClick={handleDownload} size="sm" variant="outline" className="h-7 gap-1">
                      <Download className="h-3.5 w-3.5" />
                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                         Download

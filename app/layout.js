@@ -7,8 +7,11 @@ export const metadata = {
 import ImageModel from "./_MyComponents/AlbumsComponent/ImageModel";
 import LayoutWrapper from "./_MyComponents/LayoutWrapper";
 import { UserProvider } from "./_lib/context";
-
+import { Toaster } from "@/components/ui/toaster";
+import favi from "./favicon.ico"
+import { Suspense } from "react";
 export default  function RootLayout({ children}) {
+
   return (
     <html lang="en">
       <head>
@@ -28,14 +31,19 @@ export default  function RootLayout({ children}) {
           href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Knewave&display=swap"
           rel="stylesheet"
         ></link>
+         <link rel="icon" href={favi.src} />
       </head>
       <body>
         <UserProvider>
-          <ImageModel />
-
-          <LayoutWrapper>
+       <Suspense>
+           <ImageModel />
+       </Suspense>
+     <Toaster   />
+         <Suspense>
+           <LayoutWrapper>
             {children}
           </LayoutWrapper>
+         </Suspense>
         </UserProvider>
       </body>
     </html>

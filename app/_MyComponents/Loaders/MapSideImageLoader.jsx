@@ -1,3 +1,4 @@
+"use client"
 import { Skeleton } from "@/components/ui/skeleton";
 
 function MapSideImageLoader() {
@@ -19,6 +20,7 @@ function MapSideImageLoader() {
             </div>
       </div>
          ))}
+      
       </div>
    );
 }
