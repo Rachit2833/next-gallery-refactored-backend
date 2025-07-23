@@ -53,7 +53,7 @@ function AddAlbumForm({ setIsOpen, }) {
                            if (res?.message === "Album Saved") {
                               setIsOpen(false);
                               toast({
-                                 title: "Album Added Successfully",
+                                 title: "Album Creating Started",
                                  description: description,
                                  action: <ToastAction altText="Goto schedule to undo">Done</ToastAction>,
                               });

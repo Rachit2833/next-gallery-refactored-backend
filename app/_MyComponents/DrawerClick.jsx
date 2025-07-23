@@ -28,7 +28,7 @@ import ImageAlbumAddLayout from "./AlbumsComponent/ImageAlbumAddLayout"
 import PasteModule from "./PasteModule"
 import ToggleButton from "./ToggleButton"
 import Uploadcard from "./UploadCard"
-import { saveMassImages, saveNewImage } from "../_lib/actions"
+import { saveMassImages } from "../_lib/actions"
 
 function DrawerClick({ name, formType = "Image" }) {
    const {
@@ -60,46 +60,41 @@ function DrawerClick({ name, formType = "Image" }) {
       setFile((prevFile) => [...prevFile, ...updatedFileUrls]);
    };
 
-const handleSave = async () => {
-  const allImages = [...imagesPasted, ...file]; // From pasted and uploaded
-  setIsSaving(true);
+   const handleSave = async () => {
+      const allImages = [...imagesPasted, ...file];
+      setIsSaving(true);
 
-  const formData = new FormData();
+      const formData = new FormData();
 
-  allImages.forEach((img, index) => {
-    const imageFile = img?.imageFile;
-    if (imageFile instanceof File || imageFile instanceof Blob) {
-      formData.append("images", imageFile);
-    } else {
-      console.warn(`Skipped image at index ${index}`, img);
-    }
-  });
+      allImages.forEach((img, index) => {
+         const imageFile = img?.imageFile;
+         if (imageFile instanceof File || imageFile instanceof Blob) {
+            formData.append("images", imageFile);
+         } else {
+            console.warn(`Skipped image at index ${index}`, img);
+         }
+      });
 
-  formData.append("LocationName", location);
-  formData.append("Description", globalDescription || "No description provided");
-  formData.append("Country", "India");
-  formData.append("Favourite", "false");
-  formData.append("detection", "true");
+      formData.append("LocationName", location);
+      formData.append("Description", globalDescription || "No description provided");
+      formData.append("Country", "India");
+      formData.append("Favourite", "false");
+      formData.append("detection", "true");
 
-  const people = []; // You can fill this as needed
-  formData.append("People", JSON.stringify(people));
+      const people = [];
+      formData.append("People", JSON.stringify(people));
 
-  // DEBUG: log FormData contents
-  for (const [key, value] of formData.entries()) {
-    console.log(key, value);
-  }
+      try {
+         await saveMassImages(formData);
+         setImagesPasted([])
+         setFile([])
+      } catch (err) {
+         console.error("Error saving image:", err);
+      }
 
-  try {
-    await saveMassImages(formData);
-  } catch (err) {
-    console.error("Error saving image:", err);
-  }
-
-  setIsSaving(false);
-  setDrawerOpen(false);
-};
-
-
+      setIsSaving(false);
+      setDrawerOpen(false);
+   };
 
    return (
       <div className="relative">
@@ -234,10 +229,10 @@ const handleSave = async () => {
                               />
                            </DrawerHeader>
 
-                           {/* SCROLLABLE MULTI UPLOAD AREA */}
-                           <div className="max-h-[40rem] overflow-auto px-4 py-2 border rounded-md mt-4 ">
+                           {/* Fixed height scrollable image area */}
+                           <div className="h-[30rem] overflow-auto px-4 py-2 border rounded-md mt-4">
                               <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-2 gap-4">
-                                 <PasteModule additionalData={file} />
+                                 <PasteModule additionalData={file} setFile={setFile} />
                               </div>
                            </div>
                         </>

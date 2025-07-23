@@ -5,7 +5,7 @@ async function ImageCardGrid({ id, year }) {
    const cookieStore = await cookies()
    const yearParam = year === "All" ? "all" : year;
    let res = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/album/images/${id}?year=${yearParam}`, {
-      next: { revalidate: 60 },
+
       headers: {
          "Content-Type": "application/json",
          Authorization: `Bearer ${cookieStore.get("session").value}`,

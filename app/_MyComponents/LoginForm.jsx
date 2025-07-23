@@ -47,9 +47,9 @@ function LoginForm() {
                </div>
             </CardContent>
             <CardFooter className="flex justify-end gap-4">
-               <LoadingButton buttonText="Cancel" variant="outline" type="submit" />
+               <Button   variant="outline" type="button"> Cancel</Button>
+               <LoadingButton buttonText="Login" type="submit" />
 
-               <Button type="submit"> Login</Button>
             </CardFooter>
          </form>
       </Card>

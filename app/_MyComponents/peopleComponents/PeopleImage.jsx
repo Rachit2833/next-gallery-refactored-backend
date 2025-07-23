@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
 import ImageCard from "../ImageCard";
-async function PeopleImage({ name }) {
+import PeopleWrapper from "./PeopleWrapper";
+async function PeopleImage({ name,param }) {
 console.log(name._id,"jjjkkjk")
    const cookieStore = await cookies()
-   const data = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image?frId=${name._id}`,{
-      next: { revalidate: 60 },
+   const data = await fetch(`http://localhost:2833/image?frId=${name._id}&year=${param.year}&sort=${param.sort}&page=${param.page}`,{
+
       headers: {
          "Content-Type": "application/json",
          authorization: `Bearer ${cookieStore.get("session").value}`,
@@ -14,16 +15,12 @@ console.log(name._id,"jjjkkjk")
    console.log(res,"fss");
 
    return (
-      <div className="grid md:grid-cols-3 grid-cols-2 gap-4">
 
 
-         {
-            res.images?.map((item, index) => (
-               <ImageCard key={index} editSelection={true} name={name} image={item} />
-            ))
-         }
 
-      </div>
+        <PeopleWrapper name={name} res={res} />
+
+
    )
 }
 

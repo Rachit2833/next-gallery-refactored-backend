@@ -1,13 +1,13 @@
 "use client";
-import imgs from "@/app/dune.jpg";
+import imgs from "@/public/Images/dune.jpg";
 import { Button } from "@/components/ui/button";
+import { DrawerClose, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Earth } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { DrawerClose, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useFormStatus } from "react-dom";
-import { getLocationInfo, saveNewImage } from "../_lib/actions";
+import { saveNewImage } from "../_lib/actions";
 import { useUser } from "../_lib/context";
 import { Deletebutton } from "./ImageCard";
 

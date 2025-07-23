@@ -11,32 +11,36 @@ import {
 import { CloudCog } from "lucide-react";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
+export const metadata = {
+  title: "People",
+  description: "View all the people detected in your photo collection using smart face recognition.",
+};
 
 async function page({ params, searchParams }) {
   const param = await params;
   const cookieStore = await cookies();
   const searchParamValue = await searchParams;
-  const res = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/label/${param.id}`, {
-    next: { revalidate: 60 },
+  const {sort,page,year}=searchParams
+  const res = await fetch(`http://localhost:2833/label/${param.id}`, {
     headers: {
       "Content-Type": "application/json",
       authorization: `Bearer ${cookieStore.get("session").value}`,
     },
   });
   const newRes = await res.json();
-  console.log(newRes[0],"noj")
+  personName=newRes.name
   return (
     <>
       <div className="flex items-center">
         <SideFilterLayout year={searchParamValue.year} />
       </div>
-      <Card>
-        <CardHeader className="">
+      <Card className=" min-h-[85vh]">
+        <CardHeader >
           <SideProfile res={newRes[0]} />
         </CardHeader>
         <CardContent>
-          <Suspense fallback={<ImageLoader />}>
-            <PeopleImage name={newRes[0]} />
+          <Suspense key={[sort,page,year]} fallback={<ImageLoader />}>
+            <PeopleImage param={searchParamValue} name={newRes[0]} />
           </Suspense>
         </CardContent>
         <CardFooter></CardFooter>

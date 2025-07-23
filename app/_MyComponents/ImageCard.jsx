@@ -1,5 +1,5 @@
 "use client";
-import img from "@/app/dune.jpg";
+import img from "@/public/Images/dune.jpg";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -64,7 +64,8 @@ function ImageCard({ image, text, editSelection, name, toggleFav }) {
     setSelectedImages,
     isTest,
     setIsTest,
-    handleDownload
+    handleDownload,
+    getAltText
     
   } = useUser();
 
@@ -134,7 +135,7 @@ function ImageCard({ image, text, editSelection, name, toggleFav }) {
               ? img
               : image?.ImageUrl
           }
-          alt="Placeholder"
+          alt={getAltText(image)}
           fill
           objectFit="contain"
           className="rounded-t-lg"

@@ -1,15 +1,14 @@
 import { Avatar } from "@/components/ui/avatar";
+import image2 from "@/public/Images/dune.jpg";
 import { AvatarFallback, } from "@radix-ui/react-avatar";
-import Image from "next/image";
-import image2 from "@/app/image3.jpeg";
-import Link from "next/link";
 import { cookies } from "next/headers";
-import { CloudCog } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 async function PeopleAvatarFull() {
     const abc = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAMklEQVR4nAEnANj/AAwNOwENPwEAMQQDNwD+///L2eTO2ub+//8A/v395ejt5enu/v39Q/QXhr/juNAAAAAASUVORK5CYII="
    const cookieStore = await cookies()
    const response = await fetch("https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/labels", {
-      next: { revalidate: 60 },
+
       headers: {
          "Content-Type": "application/json",
          authorization: `Bearer ${cookieStore.get("session").value}`,

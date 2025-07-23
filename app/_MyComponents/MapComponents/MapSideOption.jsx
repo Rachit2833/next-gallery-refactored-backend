@@ -12,7 +12,7 @@ function getCountryCodeByName(countryName) {
 }
 async function MapSideOption({year,yearRange}) {
    const cookieStore = await cookies()
-   const data = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/stats/countries?year=${year}&yearRange=${yearRange}`,{
+   const data = await fetch(`http://localhost:2833/stats/countries?year=${year}&yearRange=${yearRange}`,{
       headers: {
          "Content-Type": "application/json",
          authorization: `Bearer ${cookieStore.get("session").value}`,

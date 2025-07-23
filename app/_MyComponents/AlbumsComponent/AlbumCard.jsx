@@ -1,25 +1,24 @@
 "use client"
+import { deleteAlbumAction, generateShareLinkAlbum, saveSharedAlbum } from "@/app/_lib/actions"
+import { useUser } from "@/app/_lib/context"
+import image from "@/public/Images/dune.jpg";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Archive, ChevronRight, CloudCog, Delete, Heart, Share2, Trash, Trash2 } from "lucide-react"
+import { DialogTrigger } from "@/components/ui/dialog"
+import { ToastAction } from "@/components/ui/toast"
+import { useToast } from "@/hooks/use-toast"
+import { ChevronRight, Share2, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import image from "@/app/dune.jpg";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog";
-import { deleteAlbumAction, generateShareLink, generateShareLinkAlbum, saveSharedAlbum } from "@/app/_lib/actions"
-import { Deletebutton } from "../ImageCard"
 import { useState } from "react"
-import LInkDialog from "../SearchComponents/LInkDialog"
-import { DialogTrigger } from "@/components/ui/dialog"
-import { useUser } from "@/app/_lib/context"
-import { useToast } from "@/hooks/use-toast"
-import { ToastAction } from "@/components/ui/toast"
-import { SubmitButton } from "../SignUpForm"
 import { useFormStatus } from "react-dom"
+import { Deletebutton } from "../ImageCard"
+import LInkDialog from "../SearchComponents/LInkDialog"
 
 function AlbumCard({item,shared}) {
    const [isOpen, setIsOpen] = useState(false);
-   const { isLoadingLink: isLoading, setIsLoadingLink: setIsLoading, selectedImages, url, setUrl, isTest, setIsTest,userID }=useUser()
+   const { isLoadingLink: isLoading, setIsLoadingLink: setIsLoading, selectedImages, url, setUrl, isTest, setIsTest,userID,getAltText }=useUser()
       const abc = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAMklEQVR4nAEnANj/AAwNOwENPwEAMQQDNwD+///L2eTO2ub+//8A/v395ejt5enu/v39Q/QXhr/juNAAAAAASUVORK5CYII="
    const router = useRouter()
    const pathname = usePathname()
@@ -44,7 +43,7 @@ function AlbumCard({item,shared}) {
          <Image
             className="rounded-xl z-0"
             src={item.ImageUrl||image}
-            alt="Dune"
+            alt={getAltText(image)}
             layout="fill"
             objectFit="cover"
             placeholder={item.blurredImage||abc}

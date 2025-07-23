@@ -1,17 +1,25 @@
 
 import "./global.css";
-export const metadata = {
-  title: "PWA-Gallery",
-  description: "A New Ai Gallery to Manage All your Favourite Memories",
-};
 import ImageModel from "./_MyComponents/AlbumsComponent/ImageModel";
 import LayoutWrapper from "./_MyComponents/LayoutWrapper";
 import { UserProvider } from "./_lib/context";
 import { Toaster } from "@/components/ui/toaster";
-import favi from "./favicon.ico"
+
 import { Suspense } from "react";
+export const metadata = {
+ title: {
+    template: "%s / NextGallery",
+    default: " Welcome / NextGallery",
+  },
+  description: "A modern photo gallery application for organizing and viewing your memories.",
+  // keywords: ["photo gallery", "image management", "albums", "memories", "Next.js gallery"],
+  // authors: [{ name: "Rachit2833", url: "https://github.com/Rachit2833" }],
+  // creator: "Rachit Rawat",
+  // themeColor: "#ffffff",
+};
 export default  function RootLayout({ children}) {
 
+  
   return (
     <html lang="en">
       <head>
@@ -31,7 +39,7 @@ export default  function RootLayout({ children}) {
           href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Knewave&display=swap"
           rel="stylesheet"
         ></link>
-         <link rel="icon" href={favi.src} />
+
       </head>
       <body>
         <UserProvider>

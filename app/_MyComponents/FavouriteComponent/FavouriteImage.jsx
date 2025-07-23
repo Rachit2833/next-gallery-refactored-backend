@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
 import ImageCard from "../ImageCard";
 import { CloudCog } from "lucide-react";
-async function FavouriteImage() {
-
+import FavouriteGridWrapper from "../FavouriteGridWrapper";
+async function FavouriteImage({param}) {
+   console.log(param.year,"sfjb");
    const cookieStore = await cookies()
-   const data = await fetch(`https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image/favourite`,{
+   const data = await fetch(`http://localhost:2833/image?favourite=true&year=${param.year}`,{
       headers: {
          "Content-Type": "application/json",
          authorization: `Bearer ${cookieStore.get("session").value}`,
@@ -14,16 +15,8 @@ async function FavouriteImage() {
    console.log(res,"fss");
 
    return (
-      <div className="grid md:grid-cols-3 grid-cols-2 gap-4">
-
-
-         {
-            res.images?.map((item, index) => (
-               <ImageCard key={index} editSelection={true}  image={item} />
-            ))
-         }
-
-      </div>
+      
+            <FavouriteGridWrapper res={res} />
    )
 }
 

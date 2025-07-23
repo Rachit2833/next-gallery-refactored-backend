@@ -8,11 +8,17 @@ import { useUser } from '../_lib/context';
 
 function NavBar() {
    const pathname = usePathname();
-   const {userID, setUserId}=useUser()
-   useEffect(()=>{
-     console.log("running")
-     setUserId(localStorage.getItem('userId'))
-   },[])
+   const { setSelectedImages, setOpenCamera, setVideoSrc } = useUser()
+
+   useEffect(() => {
+      setSelectedImages([])
+      setOpenCamera(false)
+      setVideoSrc(null)
+   }, [pathname])
+
+   useEffect(() => {
+
+   })
    const navigationItems = [
       {
          name: "Albums",

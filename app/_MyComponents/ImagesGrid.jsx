@@ -19,10 +19,8 @@ async function ImagesGrid({ searchParams }) {
   const queryString = params.toString();
   const cookieStore = await cookies();
 
-  const url = `https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image${queryString ? `?${queryString}` : ""}`;
-
+  const url = `http://localhost:2833/image${queryString ? `?${queryString}` : ""}`;
   let res = await fetch(url, {
-    next: { revalidate: 60 },
     headers: {
       "Content-Type": "application/json",
       authorization: `Bearer ${cookieStore.get("session")?.value || ""}`,

@@ -3,7 +3,10 @@ import ImageLoader from "@/app/_MyComponents/Loaders/ImageLoader";
 import SideFilterLayout from "@/app/_MyComponents/SideFilterLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
-
+export const metadata = {
+  title: "Albums",
+  description: "Browse, organize, and manage your photo albums to relive your cherished moments on NextGallery.",
+};
 async function page({ params ,searchParams }) {
   const { id }= await params
   let paramval= await searchParams

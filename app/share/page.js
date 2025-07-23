@@ -3,7 +3,10 @@ import ShareImages from "../_MyComponents/SearchComponents/ShareImages";
 import ShareWrapper from "../_MyComponents/SearchComponents/ShareWrapper";
 import ImageLoader from "../_MyComponents/Loaders/ImageLoader";
 
-export const revalidate = 0;
+export const metadata = {
+  title: "Share",
+  description: "Share your favorite memories and albums with friends and family through secure links on NextGallery.",
+};
 async function page({ searchParams }) {
   const params = await searchParams;
 

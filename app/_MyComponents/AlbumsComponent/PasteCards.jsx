@@ -11,9 +11,11 @@ function PasteCards({res,cod,frId,query,children}) {
    const router = useRouter();
    const searchParams = useSearchParams()
    const pathName = usePathname()
-   const {  setQueryState, } = useUser()
+   const {  setQueryState, setFetchedImages} = useUser()
 
    useEffect(()=>{
+      console.log("hebjh");
+      setFetchedImages(res)
       if(!query){
          const params = new URLSearchParams(searchParams)
          params.delete("cod")
@@ -32,7 +34,7 @@ function PasteCards({res,cod,frId,query,children}) {
               return  <ImageCard image={item} key={index} />
            })}
 
-      <PasteModule />
+      {/* <PasteModule /> */}
          {children||null}
       </div>
    );

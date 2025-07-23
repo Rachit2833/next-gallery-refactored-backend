@@ -19,15 +19,15 @@ import { useEffect, useRef, useState } from "react";
 import Uploadcard from "../UploadCard";
 
 function CameraUi() {
-   const [openCamera, setOpenCamera] = useState(false);
+ 
    const [isDrawerOpen, setDrawerOpen] = useState(false);
    const [currentMatches, setCurrentMatches] = useState([]);
-   const [videoSrc, setVideoSrc] = useState(null);
    const [facingMode, setFacingMode] = useState("environment");
    const [urlBlob, setUrlBlob] = useState(null);
    const videoRef = useRef();
    const canvasRef = useRef();
    const [detected, setDetected] = useState(false);
+   const {openCamera, setOpenCamera , videoSrc, setVideoSrc}=useUser()
 
   const checkLabels = async () => {
     const identifiers = [];
@@ -240,7 +240,7 @@ function CameraUi() {
                   >
                      {!openCamera ? "Open Camera" : "Close Camera"}
                   </Button>
-                  <Drawer open={isDrawerOpen} onOpenChange={() => setDrawerOpen(!isDrawerOpen)}>
+                  <Drawer className="max-h-[60vh]" open={isDrawerOpen} onOpenChange={() => setDrawerOpen(!isDrawerOpen)}>
                      <DrawerTrigger onClick={() => setDrawerOpen(true)}>
                         <span
                            className={`${urlBlob ? "" : "hidden"} border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 rounded-lg`}

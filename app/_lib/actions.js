@@ -96,7 +96,6 @@ export async function createNewAlbum(formData) {
   }
 }
 export async function saveSharedAlbum(dataX) {
-  console.log(dataX, "data");
   const cookieStore = await cookies();
 
   try {
@@ -174,6 +173,7 @@ export async function updateFavourite(formData) {
   }
 }
 export async function saveNewImage(formData, id) {
+  const cookieStore = await cookies();
   console.log("hello,", formData);
 
   // Parse the people array from formData
@@ -196,12 +196,13 @@ export async function saveNewImage(formData, id) {
 
   try {
     const res = await fetch("http://localhost:2833/image/mass", {
+      headers:{
+        authorization: `Bearer ${cookieStore.get("session").value}`,
+      },
       method: "POST",
       body: data,
     });
     const val = await res.json();
-    console.log(val);
-
     revalidatePath("/");
     revalidatePath("/memory-map");
 
@@ -658,6 +659,7 @@ export async function deleteManyImages(idArray) {
     console.log(data, "ghjgj");
 
     if (!res.ok) {
+      
       throw new Error(`Failed to delete image with status ${res.status}`);
     }
     revalidatePath("/");

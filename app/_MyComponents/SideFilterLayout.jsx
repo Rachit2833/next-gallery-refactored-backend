@@ -9,6 +9,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useUser } from "../_lib/context"
 import { saveAs } from "file-saver"
 import { useToast } from "@/hooks/use-toast";
+import RefreshButton from "./RefreshButton"
 
 
 
@@ -50,7 +51,7 @@ function SideFilterLayout({ year, text, formType }) {
             saveAs(item?.url, Date.now().toString());
             toast({
                title: "Download started!",
-               description: "Your file is being downloaded.",  
+               description: "Your file is being downloaded.",
             });
          } catch (error) {
             toast({
@@ -63,7 +64,7 @@ function SideFilterLayout({ year, text, formType }) {
 
    return (
       <>
-
+         
          {pathname !== "/memory-map" && pathname !== "/post" ?
             <>
                <Filter
@@ -73,6 +74,7 @@ function SideFilterLayout({ year, text, formType }) {
                   year={year}
                />
                <div className="ml-auto flex items-center gap-2">
+                  <RefreshButton />
                   <DropdownMenu>
                      <DropdownMenuTrigger asChild>
                         <Button
@@ -86,29 +88,34 @@ function SideFilterLayout({ year, text, formType }) {
                            </span>
                         </Button>
                      </DropdownMenuTrigger>
-                     <DropdownMenuContent>
-                        <DropdownMenuCheckboxItem
-                           checked={searchParams.get("sort") === "1" || searchParams.get("sort") === null}
-                           onClick={() => handleSortChange("1")}
-                        >
-                           Oldest to Newest
-                        </DropdownMenuCheckboxItem>
-                        <DropdownMenuCheckboxItem
-                           checked={searchParams.get("sort") === "-1"}
-                           onClick={() => handleSortChange("-1")}
-                        >
-                           Newest to Oldest
-                        </DropdownMenuCheckboxItem>
-                     </DropdownMenuContent>
-                  </DropdownMenu>
-                  <Button onClick={handleDownload} size="sm" variant="outline" className="h-7 gap-1">
-                     <Download className="h-3.5 w-3.5" />
-                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Download
-                     </span>
-                  </Button>
-                  <DrawerClick name={text} formType={formType} />
-               </div></> : null}
+
+                  <DropdownMenuContent>
+                     <DropdownMenuCheckboxItem
+                        checked={searchParams.get("sort") === "_id"}
+                        onClick={() => handleSortChange("_id")}
+                     >
+                        Oldest to Newest
+                     </DropdownMenuCheckboxItem>
+                     <DropdownMenuCheckboxItem
+                        checked={
+                           searchParams.get("sort") === "-_id" || searchParams.get("sort") === null
+                        }
+                        onClick={() => handleSortChange("-_id")}
+                     >
+                        Newest to Oldest
+                     </DropdownMenuCheckboxItem>
+                  </DropdownMenuContent>
+               </DropdownMenu>
+
+               <Button onClick={handleDownload} size="sm" variant="outline" className="h-7 gap-1">
+                  <Download className="h-3.5 w-3.5" />
+                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                     Download
+                  </span>
+               </Button>
+               <DrawerClick name={text} formType={formType} />
+            </div></> : null
+}
       </>
    )
 }

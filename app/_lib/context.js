@@ -6,6 +6,10 @@ import { toast } from "@/hooks/use-toast";
 const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
 export const UserProvider = ({ children }) => {
+  const [personalDetails, setPersonalDetails] = useState(true);
+  const [openCamera, setOpenCamera] = useState(false);
+  const [videoSrc, setVideoSrc] = useState(null);
+  const [modelType,setModelType]=useState(1)
   const [selectedImages, setSelectedImages] = useState([])
   const [imageLeft, setImageLeft] = useState(0)
   const [imagesPasted, setImagesPasted] = useState([]);//Pasted
@@ -115,9 +119,23 @@ export const UserProvider = ({ children }) => {
       });
     }
   };
+  function getAltText(image, personalDetails = true) {
+  if (!image) return "Image preview";
+
+  const { Description, Location  } = image;
+  console.log( Description, Location);
+  if (personalDetails) {
+    const location = Location?.name || "Unknown location";
+    return `${Description || "No description"} — Taken at ${location} `;
+  }
+
+  return Description || "No description";
+}
   return (
     <UserContext.Provider
       value={{
+        getAltText,
+        modelType,setModelType,
         handleDownload,
         lat,
         long,
@@ -177,7 +195,10 @@ export const UserProvider = ({ children }) => {
         userID,
         setUserId,
         location, setLocation,
-        isPending, setIsPending
+        isPending, setIsPending,
+        openCamera, setOpenCamera,
+         videoSrc, setVideoSrc,
+         personalDetails, setPersonalDetails
       }}
     >
       {children}

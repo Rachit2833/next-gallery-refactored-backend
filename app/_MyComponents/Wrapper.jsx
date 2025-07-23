@@ -9,9 +9,10 @@ function Wrapper({alc, card, params }) {
    const { setUserId } = useUser()
 
    useEffect(() => {
-      // Access localStorage only on client side
       const storedVal = localStorage.getItem("userId");
+      console.log(storedVal,"stored");
       if (storedVal) {
+
          setVal(storedVal);
          setUserId(storedVal);
       }

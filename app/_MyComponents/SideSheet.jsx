@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import img from "../a.jpg"
+import img from "@/public/favicon_io/android-chrome-512x512.png"
 import {
   Home,
   ImageIcon,
@@ -47,7 +47,7 @@ import SearchLoader from "./Loaders/SearchLoader"
 import { logOutUser } from "../_lib/actions"
 
 function SideSheet() {
-  const { searchVal, setSearchVaL, searchData, setSearchData, queryState,modelImages, setModelImages,setIsImageOpen } =useUser()
+  const { searchVal, setSearchVaL, searchData, setSearchData, queryState,modelImages, setModelImages,setIsImageOpen, setModelType, } =useUser()
   const [isLoading, setIsLoading] = useState(false)
   const pathName = usePathname()
   const pathArray = pathName.split("/")
@@ -238,6 +238,9 @@ function SideSheet() {
                     <Badge
                       key={i}
                       onClick={() => {
+                        if(pathName!=="/"){
+                          router.push("/")
+                        }
                         setSearchVaL(item.label)
                         handleParams(item._id, "frId")
                       }}
@@ -256,6 +259,9 @@ function SideSheet() {
                     <Badge
                       key={i}
                       onClick={() => {
+                         if(pathName!=="/"){
+                          router.push("/")
+                        }
                         setSearchVaL(item)
                         handleParams(item, "cod")
                       }}
@@ -270,6 +276,7 @@ function SideSheet() {
               <ScrollArea className="border bg-card max-h-72 w-full p-2">
                 {searchData?.DesData?.map((item, i) => {
                   return <div onClick={()=>{
+                   setModelType(2)
                    setIsImageOpen(true)
                    setModelImages(item)
                   }} className=" cursor-pointer" key={i}>

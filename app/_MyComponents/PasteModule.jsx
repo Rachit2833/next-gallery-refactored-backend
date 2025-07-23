@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import PasteCardDummy from './PasteCardDummy';
 import { useUser } from '../_lib/context';
 
-function PasteModule({additionalData=[]}){
+function PasteModule({additionalData=[],setFile}){
    const {imagesPasted, setImagesPasted}=useUser()
     const handlePaste = (event) => {
         const clipboardData = event.clipboardData || window.clipboardData;
@@ -40,10 +40,22 @@ function PasteModule({additionalData=[]}){
     
     const finalImages = [...imagesPasted,...additionalData]
     console.log(finalImages);
+    
+const handleRemoveImage = (indexToRemove) => {
+   console.log("Hello ");
+   const totalImages = [...imagesPasted, ...additionalData];
+   const updatedImages = totalImages.filter((_, i) => i !== indexToRemove);
+   const updatedPasted = updatedImages.slice(0, imagesPasted.length);
+   const updatedFiles = updatedImages.slice(imagesPasted.length);
+
+   setImagesPasted(updatedPasted);
+   setFile(updatedFiles);
+};
+
     return (
         <>
             {finalImages?.map((item, index) => {
-                return <PasteCardDummy  key={index} urlBlob={item?.imageUrl} />
+                return <PasteCardDummy index={index} onRemoveImage={handleRemoveImage}  key={index} urlBlob={item?.imageUrl} />
             })}
         </>
     );

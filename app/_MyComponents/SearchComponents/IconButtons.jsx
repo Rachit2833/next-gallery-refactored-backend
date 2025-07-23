@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 
 function IconButtons({val, params,albumComponent, save, leave = true, share = true, link = true, album = true }) {
 
-   const { selectedImages, setIsLoadingLink: setIsLoading, url, setUrl } = useUser();
+   const { selectedImages, setIsLoadingLink: setIsLoading, url, setUrl,setSelectedImages } = useUser();
+   const [isLeaveDialogOpen, setLeaveDialogOpen] = useState(false);
    const router = useRouter();
    const { toast } = useToast();
    console.log(val,"val2");
@@ -57,7 +58,7 @@ function IconButtons({val, params,albumComponent, save, leave = true, share = tr
                         <DialogTrigger
                            onClick={async () => {
                               setIsLoading(true);
-                              const res = await generateShareLink(val.user.id, selectedImages);
+                              const res = await generateShareLink(val, selectedImages);
                               setUrl(res);
                               setIsLoading(false);
                            }}
@@ -86,6 +87,7 @@ function IconButtons({val, params,albumComponent, save, leave = true, share = tr
                   )}
                   {leave && (
                      <LeaveDialog
+                        isLeaveDialogOpen={isLeaveDialogOpen} setLeaveDialogOpen={setLeaveDialogOpen}
                         action={async () => {
                            await deleteManyImages(selectedImages);
                         }}
@@ -101,7 +103,7 @@ function IconButtons({val, params,albumComponent, save, leave = true, share = tr
             </Card>
             <Card className="p-4 bg-transparent flex justify-center items-center">
                <Button
-
+                   onClick={()=>setSelectedImages([])}
                   className="w-14 h-14 flex text-[2rem] justify-center items-center rounded-lg cursor-pointer transition-all duration-300 shadow-lg bg-yellow-400 hover:bg-yellow-600 "
                >
                   <CheckCheckIcon className="text-white w-6 h-6" />

@@ -1,5 +1,5 @@
 "use client"
-import img from "@/app/dune.jpg";
+import img from "@/public/Images/dune.jpg";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { CardDescription } from "@/components/ui/card";
@@ -9,14 +9,13 @@ import {
    ContextMenuItem,
    ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { saveAs } from 'file-saver';
 import { Check, CheckIcon, Plus } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
 import { useFormStatus } from 'react-dom';
 
-import { deleteImagesAction, deleteSharedImages, updateFavourite } from "@/app/_lib/actions";
+import { deleteSharedImages } from "@/app/_lib/actions";
 import { useUser } from "@/app/_lib/context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";

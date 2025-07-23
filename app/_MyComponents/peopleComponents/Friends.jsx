@@ -1,7 +1,5 @@
 'use client'
-import { useState, useEffect, Suspense } from "react";
-import Image from "next/image";
-import image2 from "@/app/image3.jpeg"; // Ensure this path is correct
+import { Suspense, useState } from "react";
 
 
 import { useRouter } from "next/navigation";

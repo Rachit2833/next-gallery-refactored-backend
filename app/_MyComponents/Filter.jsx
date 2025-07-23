@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 
-function Filter({ values, paramName, defaultValue, year }) {
+function Filter({ values, paramName, defaultValue, year ,setIsOpen}) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -20,6 +20,7 @@ function Filter({ values, paramName, defaultValue, year }) {
   const handleParams = (filterValue) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(paramName, filterValue);
+    // setIsOpen(true)
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
