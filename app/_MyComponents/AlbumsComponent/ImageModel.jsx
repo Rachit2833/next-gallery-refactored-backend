@@ -2,21 +2,17 @@
 
 import { useUser } from "@/app/_lib/context";
 import image1 from "@/public/Images/dune.jpg";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
-
-// 🧠 Alt text generator utility
-
 
 function ImageModel() {
   const abc =
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAMklEQVR4nAEnANj/AAwNOwENPwEAMQQDNwD+///L2eTO2ub+//8A/v395ejt5enu/v39Q/QXhr/juNAAAAAASUVORK5CYII=";
 
   const {
+    getAltText,
     modelType,
     isImageOpen,
     setIsImageOpen,
@@ -24,7 +20,7 @@ function ImageModel() {
     setModelImages,
     fetchedImages,
     imageLeft,
-    personalDetails, // ⬅️ make sure this is in context
+    personalDetails,
   } = useUser();
 
   const params = useSearchParams();
@@ -36,10 +32,9 @@ function ImageModel() {
     (img) => img._id === modelImages?._id
   );
 
-
-  const handleParams = (paramName, filter) => {
+  const handleParams = (paramName, value) => {
     const param = new URLSearchParams(params.toString());
-    param.set(paramName, filter.toString());
+    param.set(paramName, value.toString());
     router.replace(`${pathname}?${param.toString()}`, { scroll: false });
   };
 
@@ -62,90 +57,72 @@ function ImageModel() {
   if (!isImageOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75">
-      <div className="relative w-[80%] h-[80%] bg-white rounded-lg shadow-lg overflow-hidden">
-        <Button
-          onClick={() => setIsImageOpen(false)}
-          variant="outline"
-          className="absolute top-4 right-4 z-10"
-        >
-          <X className="w-4 h-4 mr-2" />
-          Close
-        </Button>
-
-        {modelType === 1 && (
-          <>
-            <Button
-              onClick={handleNext}
-              variant="outline"
-              className="absolute bottom-1/2 right-4 z-10"
-              disabled={
-                imageNum === fetchedImages.length - 1 && imageLeft === 0
-              }
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-
-            <Button
-              onClick={handlePrevious}
-              variant="outline"
-              className="absolute bottom-1/2 left-4 z-10"
-              disabled={imageNum === 0 && page < 2}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-
-            {imageNum >= 0 && (
-              <div className="flex gap-2 text-white font-bold w-36 bg-black/50 h-12 rounded-lg justify-center items-center absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
-                <span>{imageNum + 1}</span>
-                <span>/</span>
-                <span>{fetchedImages?.length}</span>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Desktop */}
-        <AspectRatio
-          ratio={16 / 9}
-          className="sm:block hidden relative w-full h-full"
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+      <div className="relative w-full max-w-4xl max-h-[85vh] rounded-lg overflow-hidden flex items-center justify-center">
+        <div
+          className="relative w-full h-auto aspect-video bg-cover bg-center"
           style={{
             backgroundImage: `url(${modelImages?.blurredImage || abc})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
           }}
         >
+          {/* Image */}
           <Image
             priority
             src={modelImages?.ImageUrl || image1}
-            alt={getAltText(modelImages)}
+            alt={getAltText(modelImages, personalDetails)}
             fill
             className="rounded-lg object-contain"
             placeholder="blur"
             blurDataURL={modelImages?.blurredImage || abc}
           />
-        </AspectRatio>
 
-        {/* Mobile */}
-        <AspectRatio
-          ratio={1 / 8}
-          className="block sm:hidden relative w-full h-full"
-          style={{
-            backgroundImage: `url(${modelImages?.blurredImage || abc})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <Image
-            priority
-            src={modelImages?.ImageUrl || image1}
-            alt={getAltText(modelImages)}
-            fill
-            className="rounded-lg object-contain"
-            placeholder="blur"
-            blurDataURL={modelImages?.blurredImage || abc}
-          />
-        </AspectRatio>
+          {/* Close Button */}
+          <Button
+            onClick={() => setIsImageOpen(false)}
+            variant="ghost"
+            size="icon"
+            className="absolute top-3 right-3 z-10 h-8 w-8 p-1 bg-black/60 text-white hover:bg-black/80"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+
+          {modelType === 1 && (
+            <>
+              {/* Next */}
+              <Button
+                onClick={handleNext}
+                variant="ghost"
+                size="icon"
+                className="absolute top-1/2 right-3 -translate-y-1/2 z-10 h-8 w-8 p-1 bg-black/60 text-white hover:bg-black/80"
+                disabled={
+                  imageNum === fetchedImages.length - 1 && imageLeft === 0
+                }
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+
+              {/* Previous */}
+              <Button
+                onClick={handlePrevious}
+                variant="ghost"
+                size="icon"
+                className="absolute top-1/2 left-3 -translate-y-1/2 z-10 h-8 w-8 p-1 bg-black/60 text-white hover:bg-black/80"
+                disabled={imageNum === 0 && page < 2}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+
+              {/* Counter */}
+              {imageNum >= 0 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 bg-black/50 text-white px-3 py-1 rounded text-xs font-medium flex items-center gap-1">
+                  <span>{imageNum + 1}</span>
+                  <span>/</span>
+                  <span>{fetchedImages?.length}</span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

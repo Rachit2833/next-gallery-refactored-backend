@@ -13,44 +13,7 @@ function LabelImages({ val}) {
 
    const { isSelected, setIsSelected, setIsInfoOpen,  }=useUser()
    
-   const imageUrls = [
-      "https://images.unsplash.com/photo-1731331443866-8f6f72027157?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1725442224908-e2c81b767898?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1676478747004-ccdc59253b62?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1741207171370-3cee390e85da?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740021790984-c34b2b20b4a6?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740421198589-f98aa30526ac?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1730466782483-98c27d88efca?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1730466782483-98c27d88efca?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740021790984-c34b2b20b4a6?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740421198589-f98aa30526ac?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1730466782483-98c27d88efca?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740021790984-c34b2b20b4a6?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740421198589-f98aa30526ac?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740543860663-3e792b7aea1a?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1730466782483-98c27d88efca?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740021790984-c34b2b20b4a6?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740421198589-f98aa30526ac?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740543860663-3e792b7aea1a?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1730466782483-98c27d88efca?w=900&auto=format&fit=crop&q=60",
-      "https://plus.unsplash.com/premium_photo-1739392084063-1e13fc4da50f?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740021790984-c34b2b20b4a6?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740421198589-f98aa30526ac?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1740543860663-3e792b7aea1a?w=900&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1730466782483-98c27d88efca?w=900&auto=format&fit=crop&q=60",
-   ];
+   const imageUrls = ["https://images.unsplash.com/photo-1731331443866-8f6f72027157?w=900&auto=format&fit=crop&q=60",];
 
 
    const url = `https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image?frId=${isOpen}`;

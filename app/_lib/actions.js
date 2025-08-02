@@ -77,7 +77,10 @@ export async function createNewAlbum(formData) {
     const formDataToSend = new FormData();
     formDataToSend.append("Name", Name);
     formDataToSend.append("Description", Description);
-    formDataToSend.append("images", photo);
+    if(photo.size > 0) {
+      formDataToSend.append("images", photo);
+    }
+    console.log(formDataToSend,"njdcfe");
 
     const res = await fetch("http://localhost:2833/album", {
       method: "POST",
@@ -158,7 +161,7 @@ export async function updateFavourite(formData) {
       },
       body: JSON.stringify({ Favourite: !favValue }), // Negating correctly
     });
-  const response = await data.json();
+    const response = await data.json();
 
     // Check if the request was successful
     if (!data.ok) {
@@ -191,12 +194,12 @@ export async function saveNewImage(formData, id) {
   data.append("Description", "hello world");
   data.append("Favourite", "false"); // must be string for consistent parsing
   data.append("Country", formData.get("Country"));
-  data.append("detection",formData.get("detection"))
+  data.append("detection", formData.get("detection"))
   data.append("People", JSON.stringify(peoples));
 
   try {
     const res = await fetch("http://localhost:2833/image/mass", {
-      headers:{
+      headers: {
         authorization: `Bearer ${cookieStore.get("session").value}`,
       },
       method: "POST",
@@ -213,17 +216,17 @@ export async function saveNewImage(formData, id) {
   }
 }
 
-    //  let des = await autoSend(id,val.data.People)
-    //  console.log(des);
-    //  const inp = await fetch("http://localhost:2833/image/share", {
-    //    method: "POST",
-    //    headers: {
-    //      "Content-Type": "application/json",
-    //      authorization: `Bearer ${cookieStore.get("session").value}`,
-    //    },
-    //    body: JSON.stringify({ imgId:val.data._id, sharedIds: des }),
-    //  });
- 
+//  let des = await autoSend(id,val.data.People)
+//  console.log(des);
+//  const inp = await fetch("http://localhost:2833/image/share", {
+//    method: "POST",
+//    headers: {
+//      "Content-Type": "application/json",
+//      authorization: `Bearer ${cookieStore.get("session").value}`,
+//    },
+//    body: JSON.stringify({ imgId:val.data._id, sharedIds: des }),
+//  });
+
 export async function getLocationInfo(formData) {
   const cookieStore = await cookies();
   const lat = formData.get("latitude");
@@ -659,7 +662,7 @@ export async function deleteManyImages(idArray) {
     console.log(data, "ghjgj");
 
     if (!res.ok) {
-      
+
       throw new Error(`Failed to delete image with status ${res.status}`);
     }
     revalidatePath("/");
@@ -677,14 +680,14 @@ export async function generateShareLink(sharedById, imgIds) {
         "Content-Type": "application/json",
         authorization: `Bearer ${cookieStore.get("session").value}`,
       },
-      body: JSON.stringify({ imgIds, sharedById }),
+      body: JSON.stringify({ imgIds}),
     });
     if (!response.ok) {
       throw new Error(`Failed to sign up: ${response.statusText}`);
     }
     const data = await response.json();
-    const url = `http://localhost:3000/share?id=${data.data._id}&sharedId=${sharedById}`;
-    return url;
+
+    return data.link;
   } catch (error) {
     console.error(error);
   }
@@ -717,7 +720,7 @@ export async function addImagesToAlbum(id, photoArray) {
   const cookieStore = await cookies()
   try {
     const res = await fetch(`http://localhost:2833/album/${id}`, {
-      method: "POST",
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
         authorization: `Bearer ${cookieStore.get("session").value}`,
@@ -793,18 +796,62 @@ export async function saveMassImages(formData) {
       },
       body: formData,
     });
-    const data =  await res.json()
-    console.log(data,"hejhrweo");
+    const data = await res.json()
+    console.log(data, "hejhrweo");
 
     if (!res.ok) {
       const errText = await res.text();
       console.error("Server response:", errText);
       throw new Error(`Upload failed: ${res.statusText}`);
     }
-    
- 
+
+
     console.log("Upload successful");
   } catch (error) {
     console.error("Upload error:", error.message);
+  }
+}
+export async function updateImage(formData) {
+  try {
+    const cookieStore = await cookies();
+    const id = formData.get("id");
+    const formType = formData.get("FormType");
+    const token = cookieStore.get("session")?.value; // or wherever you're storing it
+
+    let res;
+
+    if (formType === "1") {
+      // Send JSON data
+      res = await fetch(`http://localhost:2833/user/avatarUpdate/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ImageName: formData.get("ImageName"),
+        }),
+      });
+    } else {
+      // Send form data directly
+      res = await fetch(`http://localhost:2833/user/${id}`, {
+        method: "PATCH",
+        headers: {
+          authorization: `Bearer ${token}`,
+          // Don't set Content-Type for FormData
+        },
+        body: formData,
+      });
+    }
+    if (!res.ok) {
+      console.error("Update failed:", error);
+      throw error;
+    }
+    const data = await res.json();
+    revalidatePath("/setting");
+    return data;
+  } catch (error) {
+    console.error("Update failed:", error);
+    throw error;
   }
 }

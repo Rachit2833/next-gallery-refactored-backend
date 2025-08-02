@@ -1,21 +1,9 @@
 "use client"
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer } from "react-leaflet";
 
-import { Children, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
 
 function Map({ children}) {
-
-   const searchParams = useSearchParams();
-   const pathname = usePathname();
-   const router = useRouter();
-
-   
-   
-
    return (
       <MapContainer
          center={[30, 30]}

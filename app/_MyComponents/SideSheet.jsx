@@ -45,16 +45,17 @@ import { useUser } from "../_lib/context"
 import BreadCrums from "./BreadCrumb"
 import SearchLoader from "./Loaders/SearchLoader"
 import { logOutUser } from "../_lib/actions"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-function SideSheet() {
-  const { searchVal, setSearchVaL, searchData, setSearchData, queryState,modelImages, setModelImages,setIsImageOpen, setModelType, } =useUser()
+function SideSheet({profileImage}) {
+  const { searchVal, setSearchVaL, isDark, setIsDark, searchData, setSearchData, queryState, modelImages, setModelImages, setIsImageOpen, setModelType, } = useUser()
   const [isLoading, setIsLoading] = useState(false)
   const pathName = usePathname()
   const pathArray = pathName.split("/")
   const uniqueArray = [...new Set(pathArray)]
   const searchParams = useSearchParams()
   const router = useRouter()
-
+  console.log(profileImage,"hell");
   const navigationItems = [
     {
       name: "Albums",
@@ -83,6 +84,7 @@ function SideSheet() {
     },
   ]
 
+
   function handleParams(filter, filterName) {
     if (!searchParams) return
     const params = new URLSearchParams(searchParams)
@@ -91,33 +93,33 @@ function SideSheet() {
   }
 
   useEffect(() => {
-  if (!searchVal) {
-    setSearchData(null)
-    setIsLoading(false)
+    if (!searchVal) {
+      setSearchData(null)
+      setIsLoading(false)
 
-    // Remove all search-related params
-    const params = new URLSearchParams(searchParams)
-    params.delete("query")
-    params.delete("frId")
-    params.delete("cod")
-    // Add more keys here as needed
+      // Remove all search-related params
+      const params = new URLSearchParams(searchParams)
+      params.delete("query")
+      params.delete("frId")
+      params.delete("cod")
+      // Add more keys here as needed
 
-    router.replace(`${pathName}?${params}`, { scroll: false })
-    return
-  }
+      router.replace(`${pathName}?${params}`, { scroll: false })
+      return
+    }
 
-  async function search() {
-    setIsLoading(true)
-    const data = await fetch(
-      `https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image/search/?query=${searchVal}`
-    )
-    const res = await data.json()
-    setSearchData(res)
-    setIsLoading(false)
-  }
+    async function search() {
+      setIsLoading(true)
+      const data = await fetch(
+        `https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/image/search/?query=${searchVal}`
+      )
+      const res = await data.json()
+      setSearchData(res)
+      setIsLoading(false)
+    }
 
-  search()
-}, [searchVal])
+    search()
+  }, [searchVal])
 
 
   return pathName !== "/login" &&
@@ -171,11 +173,29 @@ function SideSheet() {
           ))}
         </BreadcrumbList>
       </Breadcrumb>
+         <Tabs
+              value={isDark ? "dark" : "light"}
+              onValueChange={(value) => {
+                setIsDark(value === "dark")
+                localStorage.setItem("dark",value==="dark")
+              }}
+            >
+              <TabsList className="bg-muted p-0.5 h-8">
+                <TabsTrigger value="light" className="w-8 h-7 text-lg">
+                  🌞
+                </TabsTrigger>
+                <TabsTrigger value="dark" className="w-8 h-7 text-lg">
+                  🌙
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
       <div
         className={`p-2 ${searchVal ? "rounded-xl border bg-card text-card-foreground shadow" : ""
           } top-1 absolute right-6`}
       >
         <div className="relative ml-auto flex gap-4 md:grow-0">
+          
+
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             onChange={(e) => {
@@ -195,7 +215,7 @@ function SideSheet() {
                 className="overflow-hidden rounded-full"
               >
                 <Image
-                  src={img}
+                  src={profileImage}/////h
                   width={36}
                   height={36}
                   alt="Avatar"
@@ -206,8 +226,8 @@ function SideSheet() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
+              <DropdownMenuItem><Link href="/settings">Settings</Link></DropdownMenuItem>
+              <DropdownMenuItem><Link href="/settings/themes">Themes</Link></DropdownMenuItem>
               <DropdownMenuSeparator />
               <form
                 className="p-0 m-0"
@@ -238,7 +258,7 @@ function SideSheet() {
                     <Badge
                       key={i}
                       onClick={() => {
-                        if(pathName!=="/"){
+                        if (pathName !== "/") {
                           router.push("/")
                         }
                         setSearchVaL(item.label)
@@ -259,7 +279,7 @@ function SideSheet() {
                     <Badge
                       key={i}
                       onClick={() => {
-                         if(pathName!=="/"){
+                        if (pathName !== "/") {
                           router.push("/")
                         }
                         setSearchVaL(item)
@@ -275,10 +295,10 @@ function SideSheet() {
             {searchData?.DesData?.length !== 0 ? (
               <ScrollArea className="border bg-card max-h-72 w-full p-2">
                 {searchData?.DesData?.map((item, i) => {
-                  return <div onClick={()=>{
-                   setModelType(2)
-                   setIsImageOpen(true)
-                   setModelImages(item)
+                  return <div onClick={() => {
+                    setModelType(2)
+                    setIsImageOpen(true)
+                    setModelImages(item)
                   }} className=" cursor-pointer" key={i}>
                     <Alert className="my-1">
                       <div className="flex gap-4 items-center">

@@ -64,7 +64,7 @@ function AlbumCardList({ album }) {
                               description: "All images already exists in the album",
                               variant: "destructive",
                            });
-                        } else if (res.duplicateImages.length===0){
+                        } else if (res?.duplicateImages.length===0){
                            toast({
                               title: "All Images Saved To Album",
                               description,

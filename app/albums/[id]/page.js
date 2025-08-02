@@ -14,10 +14,8 @@ async function page({ params ,searchParams }) {
   let sort=paramval.sort||-1
   return (
     <>
-      <div className="flex items-center">
-        <SideFilterLayout formType="img" year={year} />
-      </div>
-      <Card className="min-h-[85vh]" x-chunk="dashboard-06-chunk-0 ">
+      <SideFilterLayout formType="img" year={year} />
+      <Card className="w-full max-w-screen-2xl mx-auto overflow-hidden" x-chunk="dashboard-06-chunk-0 ">
         <CardHeader>
           <CardTitle>Your Saved Images From Album August 2024</CardTitle>
           <CardDescription>

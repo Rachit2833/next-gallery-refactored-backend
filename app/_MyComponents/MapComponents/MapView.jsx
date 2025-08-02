@@ -1,7 +1,29 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetOverlay, SheetTitle } from "@/components/ui/sheet";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetOverlay,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { Marker, Popup } from "react-leaflet";
@@ -22,11 +44,14 @@ const customIcon = new L.Icon({
 function MapView({ imageCard, Location, sideField, param }) {
   const yearRange = param.yearRange;
   const paramLoc = param.cod;
+
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [showSheet, setShowSheet] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
+  const [showSummaryDrawer, setShowSummaryDrawer] = useState(false);
   const [activeMarker, setActiveMarker] = useState(null);
 
   const filterArray = [
@@ -41,15 +66,22 @@ function MapView({ imageCard, Location, sideField, param }) {
   const handleParams = (filterValue) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("cod", filterValue);
-    setIsOpen(true);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+
+    if (window.innerWidth >= 1280) {
+      setShowSheet(true);
+    } else {
+      setShowDrawer(true);
+    }
+    setActiveMarker(filterValue);
   };
 
-  const handleSheetClose = () => {
-    setIsOpen(false);
+  const handleClose = () => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("cod");
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    setShowDrawer(false);
+    setShowSheet(false);
   };
 
   return (
@@ -62,63 +94,92 @@ function MapView({ imageCard, Location, sideField, param }) {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="grid grid-cols-6 gap-4 relative">
-          <Map>
-            {LocationsCod.map((item, i) => (
-              <Marker
-                key={i}
-                position={[item.coordinates[0], item.coordinates[1]]}
-                draggable={false}
-                icon={customIcon}
-                eventHandlers={{
-                  click: () => {
-                    setActiveMarker(item.name);
-                    handleParams(item.name);
-                  },
-                }}
-              >
-                {activeMarker === item.name && <Popup>{item.name}</Popup>}
-              </Marker>
-            ))}
-          </Map>
+        <CardContent className="grid grid-cols-1 xl:grid-cols-6 gap-4 relative">
+          {/* Map (always full width on mobile, spans 4 cols on xl) */}
+          <div className="col-span-1 xl:col-span-4">
+            <Map>
+              {LocationsCod.map((item, i) => (
+                <Marker
+                  key={i}
+                  position={[item.coordinates[0], item.coordinates[1]]}
+                  draggable={false}
+                  icon={customIcon}
+                  eventHandlers={{
+                    click: () => handleParams(item.name),
+                  }}
+                >
+                  {activeMarker === item.name && <Popup>{item.name}</Popup>}
+                </Marker>
+              ))}
+            </Map>
+          </div>
 
-          <Card className="col-span-2">
-            <CardContent className="m-4 p-0">
-              <Filter
-                setIsOpen={setIsOpen}
-                paramName="yearRange"
-                year={yearRange}
-                values={filterArray}
-                defaultValue="All"
-              />
-              <Suspense key={[yearRange, paramLoc]} fallback={<MapSideOptionLoader />}>
-                {sideField}
-              </Suspense>
-            </CardContent>
-          </Card>
-
-          <Sheet
-            open={isOpen}
-            onOpenChange={(open) => {
-              if (!open) handleSheetClose();
-              else setIsOpen(true);
-            }}
-            className="absolute top-0 right-0 z-50 h-full"
-          >
-            <SheetOverlay className="bg-white/10" />
-            <SheetContent side="right" className="sm:max-w-[50rem] overflow-auto">
-              <SheetHeader className="w-full">
-                <SheetTitle>Memories From This Location</SheetTitle>
-                <SheetDescription>{paramLoc}</SheetDescription>
-              </SheetHeader>
-
-              <Suspense key={[paramLoc, activeMarker]} fallback={<MapSideImageLoader />}>
-                {imageCard}
-              </Suspense>
-            </SheetContent>
-          </Sheet>
+          {/* Summary Panel — only visible on xl+ */}
+          <div className="hidden xl:block col-span-2">
+            <Card className="h-full">
+              <CardContent className="m-4 p-0 space-y-4">
+              <div className=" sm:flex  items-center">
+                <Filter
+                  setIsOpen={() => {}}
+                  paramName="yearRange"
+                  year={yearRange}
+                  values={filterArray}
+                  defaultValue="All"
+                />
+                </div>
+                <Suspense key={[yearRange, paramLoc]} fallback={<MapSideOptionLoader />}>
+                  {sideField}
+                </Suspense>
+              </CardContent>
+            </Card>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Trigger for Summary Drawer (mobile only) */}
+      <div className="fixed bottom-4 right-4 xl:hidden z-50">
+        <Drawer open={showSummaryDrawer} onOpenChange={setShowSummaryDrawer}>
+          <DrawerTrigger asChild>
+            <Button variant="outline">View Summary</Button>
+          </DrawerTrigger>
+          <DrawerContent className="h-[85vh] overflow-y-auto">
+            <DrawerHeader>
+              <DrawerTitle>Your Year in Review</DrawerTitle>
+              <DrawerDescription>Overview of your activity</DrawerDescription>
+            </DrawerHeader>
+            <Suspense fallback={<MapSideOptionLoader />}>
+              {sideField}
+            </Suspense>
+          </DrawerContent>
+        </Drawer>
+      </div>
+
+      {/* Sheet on marker click (xl only) */}
+      <Sheet open={showSheet} onOpenChange={(open) => (open ? setShowSheet(true) : handleClose())}>
+        <SheetOverlay className="bg-white/10" />
+        <SheetContent side="right" className="sm:max-w-[50rem] overflow-auto">
+          <SheetHeader className="w-full">
+            <SheetTitle>Memories From This Location</SheetTitle>
+            <SheetDescription>{paramLoc}</SheetDescription>
+          </SheetHeader>
+          <Suspense key={[paramLoc, activeMarker]} fallback={<MapSideImageLoader />}>
+            {imageCard}
+          </Suspense>
+        </SheetContent>
+      </Sheet>
+
+      {/* Drawer on marker click (below xl) */}
+      <Drawer open={showDrawer} onOpenChange={(open) => (open ? setShowDrawer(true) : handleClose())}>
+        <DrawerContent className="h-[85vh] overflow-y-auto xl:hidden">
+          <DrawerHeader>
+            <DrawerTitle>{paramLoc}</DrawerTitle>
+            <DrawerDescription>Memories from this place</DrawerDescription>
+          </DrawerHeader>
+          <Suspense key={[paramLoc, activeMarker]} fallback={<MapSideImageLoader />}>
+            {imageCard}
+          </Suspense>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

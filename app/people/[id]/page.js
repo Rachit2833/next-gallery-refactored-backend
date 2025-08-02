@@ -28,13 +28,10 @@ async function page({ params, searchParams }) {
     },
   });
   const newRes = await res.json();
-  personName=newRes.name
   return (
     <>
-      <div className="flex items-center">
         <SideFilterLayout year={searchParamValue.year} />
-      </div>
-      <Card className=" min-h-[85vh]">
+      <Card  className="w-full max-w-screen-2xl mx-auto overflow-hidden">
         <CardHeader >
           <SideProfile res={newRes[0]} />
         </CardHeader>

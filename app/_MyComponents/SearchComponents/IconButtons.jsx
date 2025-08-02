@@ -73,10 +73,12 @@ function IconButtons({val, params,albumComponent, save, leave = true, share = tr
                         <DialogTrigger className="w-14 h-14 flex justify-center items-center rounded-lg cursor-pointer transition-all duration-300 shadow-lg bg-purple-400 hover:bg-purple-600">
                            <Folder className="text-white w-6 h-6" />
                         </DialogTrigger>
-                        <DialogContent className="h-[40rem] overflow-auto">
+                        <DialogContent className="max-h-[40rem] overflow-auto">
                            <DialogTitle>Add To Album</DialogTitle>
                            <DialogDescription>Organize your images into an album</DialogDescription>
-                           {albumComponent}
+                      
+                            {albumComponent}
+
                            <DialogFooter>
                               <div className="flex mt-4 justify-end">
                                  <DialogClose className="bg-black text-white rounded-lg w-16 h-10">Done</DialogClose>

@@ -11,7 +11,7 @@ import { Children } from "react"
 
 
 function SeachBar({children,}) {
-    const { setIsSelected, setGroupMenu, groupMenu, isInputing, setIsInputing }=useUser()
+    const { setIsSelected, setGroupMenu, groupMenu, isInputing, setIsInputing,  }=useUser()
     const pathName= usePathname()
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -24,6 +24,7 @@ function SeachBar({children,}) {
    return (
        <>
        <div className="  relative ml-auto flex justify-between gap-4  md:grow-0">
+          
                       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
                onChange={(e) =>{

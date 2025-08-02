@@ -30,7 +30,7 @@ function SideProfile({ res }) {
                   <input
                      defaultValue={res.label}
                      name="labelName"
-                     className="h-full w-full p-2 focus:outline-none focus:border-0"
+                      className="w-full px-4 py-2 border rounded-md bg-muted text-muted-foreground outline-none"
                      placeholder="New Name or Nickname"
                      type="text"
                   />
@@ -63,10 +63,17 @@ function SideProfile({ res }) {
 export default SideProfile;
 
 export function SubmitButton() {
-   const { pending } = useFormStatus();
-   return (
-      <Button disabled={pending} type="submit" variant="outline" size="sm">
-         {pending ? "Updating..." : "Done"}
-      </Button>
-   );
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      disabled={pending}
+      type="submit"
+      variant="ghost" // you can also try "default" or "secondary"
+      size="sm"
+      className="bg-background ml-4 border text-accent-foreground hover:bg-accent/80 disabled:opacity-50"
+    >
+      {pending ? "Updating..." : "Done"}
+    </Button>
+  );
 }

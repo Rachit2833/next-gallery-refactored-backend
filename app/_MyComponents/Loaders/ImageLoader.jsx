@@ -4,7 +4,7 @@ function ImageLoader({gridNumber}) {
    const arr = Array.from({ length: 9 });
 
    return (
-      <div className="grid md:grid-cols-3 grid-cols-2 gap-4 col-span-3">
+      <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4 col-span-3">
          {arr.map((_, i) => (
             <div key={i} className="mx-auto bg-white rounded-lg shadow-md p-4 w-full max-w-xs lg:max-w-sm">
                <div className="relative w-full h-[15rem] bg-gray-200 rounded-t-lg cursor-pointer overflow-hidden">

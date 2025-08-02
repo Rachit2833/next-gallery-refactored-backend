@@ -15,44 +15,53 @@ import { useState } from "react"
 import { useFormStatus } from "react-dom"
 import { Deletebutton } from "../ImageCard"
 import LInkDialog from "../SearchComponents/LInkDialog"
+import { fallbackAlbumCovers } from "@/app/_lib/avatar";
 
-function AlbumCard({item,shared}) {
+function AlbumCard({ item, shared }) {
    const [isOpen, setIsOpen] = useState(false);
-   const { isLoadingLink: isLoading, setIsLoadingLink: setIsLoading, selectedImages, url, setUrl, isTest, setIsTest,userID,getAltText }=useUser()
-      const abc = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAMklEQVR4nAEnANj/AAwNOwENPwEAMQQDNwD+///L2eTO2ub+//8A/v395ejt5enu/v39Q/QXhr/juNAAAAAASUVORK5CYII="
+   const { isLoadingLink: isLoading, personalDetails, setIsLoadingLink: setIsLoading, selectedImages, url, setUrl, isTest, setIsTest, userID, getAltText } = useUser()
+   const abc = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAMklEQVR4nAEnANj/AAwNOwENPwEAMQQDNwD+///L2eTO2ub+//8A/v395ejt5enu/v39Q/QXhr/juNAAAAAASUVORK5CYII="
    const router = useRouter()
    const pathname = usePathname()
    const searchParams = useSearchParams()
    const options = { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric", hour12: true, };
    const description = new Date().toLocaleString("en-US", options);
-   const {toast}=useToast()
-   async function submitDeleteForm(formData){
+   const { toast } = useToast()
+   async function submitDeleteForm(formData) {
       await deleteAlbumAction(formData)
       setIsOpen(false)
    }
+   const isNumeric = (val) => !isNaN(val) && Number.isInteger(Number(val));
    return (
       <Card className="relative min-h-[20rem] sm:min-h-[24rem] lg:min-h-[30rem]">
          <div className="absolute z-10 top-6 sm:top-12 left-4 sm:left-8">
-            <h1 className="text-[1.5rem] sm:text-[2rem] text-white">{item.Name}</h1>
-            <p className="text-white mt-2 text-[1rem] sm:text-[1.2rem]">
+            <h1 className="text-[1.5rem] sm:text-[2rem] text- ">{item.Name}</h1>
+            <p className=" mt-2 text-[1rem] sm:text-[1.2rem]">
                {item.Description}
             </p>
-            <p className="text-white text-[0.9rem] sm:text-[1rem]"></p>
+            <p className=" text-[0.9rem] sm:text-[1rem]"></p>
          </div>
+
+
 
          <Image
             className="rounded-xl z-0"
-            src={item.ImageUrl||image}
-            alt={getAltText(image)}
+            src={
+               isNumeric(item.ImageUrl)
+                  ? fallbackAlbumCovers[parseInt(item.ImageUrl)]
+                  : item.ImageUrl || image
+            }
+            alt={getAltText(image, personalDetails)}
             layout="fill"
             objectFit="cover"
-            placeholder={item.blurredImage||abc}
+            placeholder={item.blurredImage || abc}
          />
 
+
          <div className="  absolute flex flex-row items-center justify-center gap-4 z-20 bottom-6 sm:bottom-12 right-4 sm:right-8">
-            
-              {!shared?
-              <>
+
+            {!shared ?
+               <>
                   <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
                      <AlertDialogTrigger asChild className="flex items-center p-2 sm:p-4 bg-transparent border-2 border-white text-white text-[0.9rem] sm:text-[1rem] hover:bg-white hover:text-black transition-colors h-9 px-4 py-2 rounded-md">
                         <Button variant="outline"><Trash2 /></Button>
@@ -81,43 +90,43 @@ function AlbumCard({item,shared}) {
                         className=" rounded-md h-9 px-4 py-2 flex items-center p-2 sm:p-4 bg-transparent border-2 border-white text-white text-[0.9rem] sm:text-[1rem] hover:bg-white hover:text-black transition-colors"
                         onClick={async () => {
                            setIsLoading(true);
-                           const res = await generateShareLinkAlbum(item._id,localStorage.getItem("userId") );
+                           const res = await generateShareLinkAlbum(item._id, localStorage.getItem("userId"));
                            console.log(res)
-                           console.log(res,"a");
+                           console.log(res, "a");
                            setUrl(res);
                            setIsLoading(false);
                         }}
                      >
                         <Share2 />
                      </DialogTrigger>
-                     </LInkDialog>
-                     </> : 
-                     <form action={async () => {
-   try {
-      delete item._id;
-      delete item.__v;
-      console.log("Before saving album", item);
-      
-      const response = await saveSharedAlbum(item);
-      
-      console.log("Album saved successfully", response);
+                  </LInkDialog>
+               </> :
+               <form action={async () => {
+                  try {
+                     delete item._id;
+                     delete item.__v;
+                     console.log("Before saving album", item);
 
-      toast({
-         title: "Album Saved!",
-         description: "Your album has been saved successfully.",
-         action: <ToastAction altText="Goto schedule to undo">Done</ToastAction>,
-      });
-      router.push("/albums")
-   } catch (error) {
-      console.error("Caught Error:", error);
+                     const response = await saveSharedAlbum(item);
 
-      toast({
-         title: "Something went wrong",
-         description: error.message || "An unexpected error occurred.",
-         action: <ToastAction altText="Try Again">Retry</ToastAction>,
-      });
-   }
-}} > <SubmitButtonTransparent buttonText="Save" />
+                     console.log("Album saved successfully", response);
+
+                     toast({
+                        title: "Album Saved!",
+                        description: "Your album has been saved successfully.",
+                        action: <ToastAction altText="Goto schedule to undo">Done</ToastAction>,
+                     });
+                     router.push("/albums")
+                  } catch (error) {
+                     console.error("Caught Error:", error);
+
+                     toast({
+                        title: "Something went wrong",
+                        description: error.message || "An unexpected error occurred.",
+                        action: <ToastAction altText="Try Again">Retry</ToastAction>,
+                     });
+                  }
+               }} > <SubmitButtonTransparent buttonText="Save" />
 
                </form>}
             <Button onClick={() => router.push(`/albums/${item._id}`)} className="flex items-center p-2 sm:p-4 bg-transparent border-2 border-white text-white text-[0.9rem] sm:text-[1rem] hover:bg-white hover:text-black transition-colors">
@@ -130,9 +139,9 @@ function AlbumCard({item,shared}) {
 
 
 export default AlbumCard
-export function SubmitButtonTransparent({ size,variant,buttonText }) {
+export function SubmitButtonTransparent({ size, variant, buttonText }) {
    const { pending } = useFormStatus();
-   const { selectedInGroup }=useUser()
+   const { selectedInGroup } = useUser()
 
    return (
       <Button variant={variant} size={size || "default"} type="submit" className="flex items-center p-2 sm:p-4 bg-transparent border-2 border-white text-white text-[0.9rem] sm:text-[1rem] hover:bg-white hover:text-black transition-colors" disabled={pending}>
@@ -141,7 +150,7 @@ export function SubmitButtonTransparent({ size,variant,buttonText }) {
                <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
             </>
          ) : (
-             buttonText|| "Leave"
+            buttonText || "Leave"
          )}
       </Button>
    );

@@ -1,15 +1,21 @@
 'use client'
-import React, { createContext, useState, useContext, useRef } from "react";
+import React, { createContext, useState, useContext, useRef, useEffect } from "react";
 
 import { getLocationInfo } from "./actions";
 import { toast } from "@/hooks/use-toast";
 const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
 export const UserProvider = ({ children }) => {
+  const [selectedAvatar, setSelectedAvatar] = useState("/Avatars/photo-1676022763484-810091cd3eb5.avif");
+  const [selected, setSelected] = useState("Profile");
+  const [selectedTheme, setSelectedTheme] = useState( 0);
+  const [isDark, setIsDark] = useState(false);
+  const [selectedSub, setSelectedSub] = useState(null);
+  const [subOption, setSubOption] = useState(null);
   const [personalDetails, setPersonalDetails] = useState(true);
   const [openCamera, setOpenCamera] = useState(false);
   const [videoSrc, setVideoSrc] = useState(null);
-  const [modelType,setModelType]=useState(1)
+  const [modelType, setModelType] = useState(1)
   const [selectedImages, setSelectedImages] = useState([])
   const [imageLeft, setImageLeft] = useState(0)
   const [imagesPasted, setImagesPasted] = useState([]);//Pasted
@@ -42,7 +48,16 @@ export const UserProvider = ({ children }) => {
   const [isTest, setIsTest] = useState(false);
   const infoRef = useRef();
   const contentRef = useRef();
-
+ useEffect(() => {
+    try {
+      const storedTheme = localStorage.getItem("theme");
+      const dark = localStorage.getItem("dark");
+      setIsDark(dark === "true");
+      setSelectedTheme(storedTheme ? parseInt(storedTheme) : 0);
+    } catch (e) {
+      console.error("localStorage error", e);
+    }
+  }, []);
   const addNewLabel = async (data) => {
     const res = await fetch('https://next-gallery-refactored-backend-btrh-pvihnvhaj.vercel.app/labels', {
       method: 'POST',
@@ -53,6 +68,7 @@ export const UserProvider = ({ children }) => {
     const result = await res.json(); // Parse the JSON response
     return result.label._id;
   }
+
   function getSeason() {
     const now = new Date();
     const month = now.getMonth(); // January is 0, December is 11
@@ -120,22 +136,26 @@ export const UserProvider = ({ children }) => {
     }
   };
   function getAltText(image, personalDetails = true) {
-  if (!image) return "Image preview";
+    if (!image) return "Image preview";
 
-  const { Description, Location  } = image;
-  console.log( Description, Location);
-  if (personalDetails) {
-    const location = Location?.name || "Unknown location";
-    return `${Description || "No description"} — Taken at ${location} `;
+    const { Description, Location } = image;
+    console.log(Description, Location);
+    if (personalDetails) {
+      const location = Location?.name || "Unknown location";
+      return `${Description || "No description"} — Taken at ${location} `;
+    }
+
+    return Description || "No description";
   }
 
-  return Description || "No description";
-}
+
   return (
     <UserContext.Provider
       value={{
+        selected, setSelected, selectedSub, setSelectedSub, subOption, setSubOption,
+        selectedTheme, setSelectedTheme,
         getAltText,
-        modelType,setModelType,
+        modelType, setModelType,
         handleDownload,
         lat,
         long,
@@ -197,8 +217,10 @@ export const UserProvider = ({ children }) => {
         location, setLocation,
         isPending, setIsPending,
         openCamera, setOpenCamera,
-         videoSrc, setVideoSrc,
-         personalDetails, setPersonalDetails
+        videoSrc, setVideoSrc,
+        personalDetails, setPersonalDetails,
+        selectedAvatar, setSelectedAvatar,
+        isDark, setIsDark
       }}
     >
       {children}

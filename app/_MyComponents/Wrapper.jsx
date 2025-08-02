@@ -20,10 +20,8 @@ function Wrapper({alc, card, params }) {
 
    return (
       <>
-         <div className="flex items-center">
-            <SideFilterLayout text="Add Images" year={params.year} />
-         </div>
-         <MainSlide params={params} val={val} albumComponent={alc} card={card} />
+         <SideFilterLayout text="Add Images" year={params.year} />
+         <MainSlide params={params} val={val} albumComponent={alc||<></>} card={card} />
       </>
    )
 }

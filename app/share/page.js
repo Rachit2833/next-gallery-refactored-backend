@@ -7,7 +7,7 @@ export const metadata = {
   title: "Share",
   description: "Share your favorite memories and albums with friends and family through secure links on NextGallery.",
 };
-async function page({ searchParams }) {
+export  default async function page({ searchParams }) {
   const params = await searchParams;
 
   return (

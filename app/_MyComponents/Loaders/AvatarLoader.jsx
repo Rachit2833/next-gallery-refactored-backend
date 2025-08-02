@@ -2,8 +2,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 function AvatarLoader() {
    return (
-      <>
-         {Array.from({ length: 2 }).map((_, i) => {
+      <div className="p-4 grid grid-cols-5 gap-12 col-span-full">
+         {Array.from({ length: 5 }).map((_, i) => {
             return (
                <Skeleton key={i} className="flex flex-col w-28 h-28 rounded-full items-center">
 
@@ -11,7 +11,7 @@ function AvatarLoader() {
                </Skeleton>
             )
          })}
-      </>
+      </div>
    )
 }
 

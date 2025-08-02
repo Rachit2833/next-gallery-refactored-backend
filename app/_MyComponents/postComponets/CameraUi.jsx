@@ -168,7 +168,7 @@ function CameraUi() {
       }, [videoSrc]);
 
       return (
-         <Card className="h-[90vh] w-full">
+         <Card  className="w-full max-w-screen-2xl mx-auto overflow-hidden">
             <CardHeader></CardHeader>
             <CardContent>
                <div className="inset-0 z-50 flex items-center justify-center">

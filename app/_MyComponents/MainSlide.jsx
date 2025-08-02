@@ -14,7 +14,7 @@ const {page,year,frId,cod,query,sort}=params
    return (
 <>
 
-            <Card x-chunk="dashboard-06-chunk-0" className="min-h-[85vh] relative">
+            <Card x-chunk="dashboard-06-chunk-0"  className="w-full max-w-screen-2xl mx-auto overflow-hidden">
              {selectedImages.length>0?<IconButtons val={val} albumComponent={albumComponent} />:null}
 
                <CardHeader>

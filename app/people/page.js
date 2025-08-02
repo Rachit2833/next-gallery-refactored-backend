@@ -18,7 +18,7 @@ export const metadata = {
 function Page() {
   return (
     <>
-      <Card>
+      <Card  className="w-full max-w-screen-2xl mx-auto overflow-hidden">
         <CardHeader className="border-b-4">
           <CardTitle>Capture Moments, Share Memories</CardTitle>
           <CardDescription>

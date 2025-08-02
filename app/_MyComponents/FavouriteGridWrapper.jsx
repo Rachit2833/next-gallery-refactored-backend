@@ -12,7 +12,7 @@ const FavouriteGridWrapper = ({ res }) => {
   }, [])
   return (
     <>
-     <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-2 gap-4">
+     <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
       {res.images.length > 0 ?
         res.images?.map((item, index) => (
           <ImageCard res={res.images} key={index} editSelection={true} image={item} />
