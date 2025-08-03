@@ -53,6 +53,7 @@ async function getAllImages(req, res) {
     const query = { ...req.query };
     const page = req.query.page || 1
     const limit = req.query.limit || 27
+    const sort = req.query.sort || -1;
     console.log(page, limit);
     const reservedNames = ["sort", "page", "limit", "fields"];
     reservedNames.forEach((param) => delete query[param]);
@@ -79,7 +80,7 @@ async function getAllImages(req, res) {
 
     delete query.frId;
     const images = await Image.find(filter)
-      .sort({ _id: -1 })
+      .sort({ _id: 1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .populate("People")

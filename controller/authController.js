@@ -116,7 +116,7 @@ async function protect(req, res, next) {
   try {
     const header = req.headers.authorization;
     if (!header || !header.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Please Provide Token" });
+      return res.status(401).json({ message: "No session found! Please Log in first" });
     }
     const token = header.split(" ")[1];
     if (!token) {
@@ -129,7 +129,7 @@ async function protect(req, res, next) {
     // Find user from the decoded token
     const freshUser = await User.findById(decoded.id);
     if (!freshUser) {
-      return res.status(404).json({ message: "User Not Found" });
+      return res.status(404).json({ message: "No valid User Found" });
     }
     req.user = freshUser;
 

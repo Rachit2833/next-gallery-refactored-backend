@@ -6,11 +6,12 @@ const albumRouter= require("./routes/albumRoutes")
 const statsRouter= require('./routes/statsRouter')
 const userRouter = require('./routes/usersRoutes')
 const authRouter = require('./routes/authRouter')
-const friendRouter = require('./routes/friendRouter')
+// const friendRouter = require('./routes/friendRouter')
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const http =require("http")
 const { connectDb } = require("./lib/connectDb");
+const { protect } = require("./controller/authController");
 const app = express()
 dotenv.config({ path: "./config.env" });
 
@@ -35,21 +36,23 @@ app.get("/", (req, res) => {
   res.status(200).json({ message: "HELLO WORLD" });
 });
 
-app.use("/", labelRouter);
+
 app.use("/user",userRouter );
+app.use(protect)
+app.use("/", labelRouter);
 app.use("/image", imageRouter);
 app.use("/album", albumRouter);
 app.use("/stats", statsRouter);
-app.use("/login", authRouter);
-app.use("/friends",friendRouter);
-
-
-
 app.all("*",(req,res)=>{
    res.status(404).json({
       message:`Cannot Find the ${req.originalUrl} `
    })
 })
+
+// app.use("/friends",friendRouter);
+
+
+
 
 
 async function startServer() {
