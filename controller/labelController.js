@@ -4,8 +4,8 @@ const { mongoose } = require("mongoose");
 const Label = require("../Schema/labelSchema")
 async function getAllLabels(req, res) {
   try {
-    const userId = req.body.userId || "rachit28"; // Use req.body.userId or default to "rachit28"
-    const labels = await Label.find({ userId });
+    const userID = req.user._id ; // Use req.body.userId or default to "rachit28"
+    const labels = await Label.find({ userID });
     res.status(200).json(labels);
   } catch (error) {
     console.error("Error fetching labels:", error);
@@ -69,10 +69,10 @@ async function getLabelByName(req, res) {
     label= String(label)
 
     // Use req.body.userId or default to "rachit28"
-    const userId = req.body.userId || "rachit28";
+    const userID = req.user._id
 
     // Find labels with matching userId and the name parameter
-    const labels = await Label.find({ userId, label}); // Modify the query if needed
+    const labels = await Label.find({ userID, label}); // Modify the query if needed
     res.status(200).json(labels);
   } catch (error) {
     console.error("Error fetching labels:", error);
@@ -88,10 +88,10 @@ async function getLabelById(req, res) {
 
 
     // Use req.body.userId or default to "rachit28"
-    const userId = req.body.userId || "rachit28";
+    const userID = req.user._id
 
-    // Find labels with matching userId and the name parameter
-    const labels = await Label.find({ userId, _id }); // Modify the query if needed
+    // Find labels with matching userID and the name parameter
+    const labels = await Label.find({ userID, _id }); // Modify the query if needed
     res.status(200).json(labels);
   } catch (error) {
     console.error("Error fetching labels:", error);

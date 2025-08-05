@@ -53,20 +53,22 @@ let isRunning = false;
             People: meta.people || [],
             sharedBy: meta.sharedBy || undefined,
             blurredImage: '',
+            userID: meta.userID 
           });
 
           await newImageDoc.save();
           console.log(`✅ Saved Image: ${newImageDoc._id}`);
 
           if (meta.detection) {
-            await faceIdQueue.add("Detection", {
+            await faceIdQueue.add("FaceIdQueue", {
               _id: newImageDoc._id,
               ImageUrl: newImageDoc.ImageUrl,
+              userID: meta.userID 
             });
             await pub.publish("trigger-detection-worker", "start");
           }
 
-          await blurQueue.add("Blur Generator", {
+          await blurQueue.add("BlurQueue", {
             type: "Image",
             _id: newImageDoc._id,
             ImageUrl: newImageDoc.ImageUrl,

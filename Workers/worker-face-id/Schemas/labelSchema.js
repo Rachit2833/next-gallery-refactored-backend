@@ -9,7 +9,7 @@ const labelSchema = new mongoose.Schema(
       type: [[Number]], // Array of arrays of Numbers
       required: true,
     },
-    userId: { type: String, required: true },
+    userID: { type:  mongoose.Schema.Types.ObjectId, required: true },
     blurredImage : {
       type: String,
       required:true

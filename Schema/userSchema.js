@@ -16,8 +16,11 @@ const userSchema = new mongoose.Schema(
       type: String, 
       required: true,
       select:false,
-
      },
+     seoPrivacy: {
+      type: Boolean,
+      default: false
+  },
   },
   { collection: "Users" } 
 );

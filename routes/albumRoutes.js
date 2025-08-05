@@ -4,9 +4,9 @@ const { getAllAlbum, addNewAlbum, addImageToAlbum, getAlbumById, deleteAlbum, ge
 const { searchThrottle } = require("../middleware/imageMiddleWare")
 const { upFun, uploadToStorage, upload } = require("../controller/imageController")
 const router= express.Router()
-router.route("/").get(getAllAlbum).post(upload.array("images"),addNewAlbum).patch(addImageToAlbum)
+router.route("/").get(getAllAlbum).post(upload.array("images"),addNewAlbum)
 router.route("/share").post(generateLinkAlbum);
 router.route("/share/save").post(addNewAlbum);
-router.route("/:id").get(getAlbumById).delete(deleteAlbum).post(addImageToAlbum);
+router.route("/:id").get(getAlbumById).delete(deleteAlbum).patch(addImageToAlbum);
 router.route("/images/:id").get(getAlbumImages)
 module.exports=router
