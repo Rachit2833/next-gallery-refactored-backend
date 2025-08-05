@@ -39,6 +39,11 @@ const ImageLabelSchema = new mongoose.Schema(
     },
     blurredImage : {
       type: String,
+    },
+    userID:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
     }
   },
  

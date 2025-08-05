@@ -57,7 +57,7 @@ async function getSearchUser(req, res) {
           ],
         },
       },
-      
+
     ]);
     const groupData = await Group.aggregate([
       {
@@ -75,7 +75,8 @@ async function getSearchUser(req, res) {
     ]);
 
 
-    res.status(200).json({data,
+    res.status(200).json({
+      data,
       groupData
     });
   } catch (error) {
@@ -83,5 +84,43 @@ async function getSearchUser(req, res) {
     res.status(500).json({ error: "Server Error" });
   }
 }
+async function updateUserImage(req, res) {
+  try {
+    const id = req.params.id
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: id },
+      { $set: { profilePicture: req.body.ImageUrl } },
+      { new: true }
+    );
 
-module.exports = { getSearchUser };
+
+    res.status(200).json({
+      message: updatedUser
+    });
+  } catch (error) {
+    console.error("Error in getSearchUser:", error);
+    res.status(500).json({ error: "Server Error" });
+  }
+}
+async function updateAvatarImage(req, res) {
+  try {
+    console.log("here",req.body);
+    const id = req.params.id
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: id },
+      { $set: { profilePicture: req.body.ImageName } },
+      { new: true }
+    );
+
+
+
+    res.status(200).json({
+      message: updatedUser
+    });
+  } catch (error) {
+    console.error("Error in getSearchUser:", error);
+    res.status(500).json({ error: "Server Error" });
+  }
+}
+
+module.exports = { getSearchUser, updateUserImage,updateAvatarImage };

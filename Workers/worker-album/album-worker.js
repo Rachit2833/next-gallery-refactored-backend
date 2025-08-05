@@ -1,70 +1,133 @@
-const dotenv = require('dotenv');
-dotenv.config({ path: '../config.env' }); // must be FIRST
-const { Worker } = require('bullmq');
-const { connectDb } = require('./lib/connectDb.js'); // adjust path if needed
-const { blurQueue } = require('./lib/blur-queue.js');
-const Album = require('./Schemas/albumSchema.js');
-const uploadFile = require('./lib/upload.js');
-const connection = require("./lib/redis-clinet.js"); // Not called here
+import dotenv from "dotenv";
+dotenv.config({ path: "../config.env" });
 
+import { Worker } from "bullmq";
+import { connectDb } from "./lib/connectDb.js";
+import connection from "./lib/redis-clinet.js";
+import { createClient } from "redis";
 
+import Album from "./Schemas/albumSchema.js";
+import uploadFile from "./lib/upload.js";
+import { blurQueue } from "./lib/blur-queue.js";
+
+let activeJobs = 0;
+let isRunning = false;
 
 (async () => {
   try {
     await connectDb();
-    console.log("Database Connected");
+    console.log("✅ Database connected");
+
+    const pub = createClient({ url: process.env.REDIS_URL });
+    const sub = pub.duplicate();
+
+    await pub.connect();
+    await sub.connect();
+    console.log("✅ Redis pub/sub connected");
 
     const worker = new Worker(
-      'AlbumQueue',
+      "AlbumQueue",
       async (job) => {
-       console.log("Job received:", job.id,job.data);
-         const { image, meta,   } = job.data;
+        const { image, meta, } = job.data;
+        console.log("📥 Album job received:", job.id);
+
         try {
           if (!image || !image.mimetype || !image.buffer) {
             throw new Error("Invalid image data");
           }
 
-          const extension = image.mimetype.split('/')[1];
+          const extension = image.mimetype.split("/")[1];
           const originalName = `Rachit2833-${Date.now()}.${extension}`;
           const fileBuffer = Buffer.from(image.buffer.data);
-          const { data, error } = await uploadFile(originalName, fileBuffer, image.mimetype);
 
+          const { data, error } = await uploadFile(originalName, fileBuffer, image.mimetype);
           if (error) throw new Error("Failed to upload to Supabase");
+
           const imageUrl = `https://hwhyqxktgvimgzmlhecg.supabase.co/storage/v1/object/public/Images2.0/${originalName}`;
 
-          // Construct MongoDB document
           const albumDoc = new Album({
+            userID: meta.userID,
             ImageUrl: imageUrl,
-            Name:meta.Name,
-            Description:meta.Description,
-            blurredImage:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAMklEQVR4nAEnANj/AAwNOwENPwEAMQQDNwD+///L2eTO2ub+//8A/v395ejt5enu/v39Q/QXhr/juNAAAAAASUVORK5CYII="
+            Name: meta.Name,
+            Description: meta.Description,
+            blurredImage: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAMklEQVR4nAEnANj/AAwNOwENPwEAMQQDNwD+///L2eTO2ub+//8A/v395ejt5enu/v39Q/QXhr/juNAAAAAASUVORK5CYII="
           });
+
           await albumDoc.save();
-          blurQueue.add("Blur Generator", {
+
+          // Add to BlurQueue
+          await blurQueue.add("Blur Generator", {
             type: "Album",
             _id: albumDoc._id,
-            ImageUrl: albumDoc.ImageUrl
-          })
-         
-          console.log(`✅ Saved Image: ${albumDoc._id}`);
+            ImageUrl: albumDoc.ImageUrl,
+          });
+
+          console.log(`✅ Album saved and blur job queued: ${albumDoc._id}`);
 
         } catch (error) {
-          console.error("❌ Job error:", error.message);
+          console.error("❌ Album job error:", error.message);
+          throw error;
         }
       },
-      { connection }
+      {
+        connection,
+        concurrency: 5,
+        autorun: false,
+        lockDuration: 60000,
+        stalledInterval: 30000,
+      }
     );
 
-    worker.on('completed', job => {
-      console.log(`Job ${job.id} completed`);
+    worker.run();
+
+    const checkPause = async () => {
+      if (activeJobs === 0 && isRunning) {
+        console.log("⏸️ Pausing Album worker — idle");
+        await worker.pause();
+        isRunning = false;
+      }
+    };
+
+    worker.on("active", (job) => {
+      activeJobs++;
+      console.log(`⚙️ Album job ${job.id} started. Active jobs: ${activeJobs}`);
     });
 
-    worker.on('failed', (job, err) => {
-      console.error(`Job ${job.id} failed:`, err.message);
+    worker.on("completed", async (job) => {
+      activeJobs--;
+      console.log(`🎉 Album job ${job.id} completed. Remaining: ${activeJobs}`);
+      setTimeout(checkPause, 1000);
+    });
+
+    worker.on("failed", async (job, err) => {
+      activeJobs--;
+      console.error(`🔥 Album job ${job.id} failed: ${err.message}`);
+      setTimeout(checkPause, 1000);
+    });
+
+    // Subscribe to trigger
+    await sub.subscribe("trigger-album-worker", async () => {
+      if (isRunning) return;
+      console.log("📡 Trigger received — resuming album worker...");
+      await worker.resume();
+      isRunning = true;
+      await pub.publish("worker-status", JSON.stringify({ status: "resumed", worker: "album-worker" }));
+      console.log("▶️ AlbumWorker resumed and active");
+    });
+
+    console.log("🟣 AlbumWorker ready and paused");
+    await worker.pause();
+
+    // Optional: Graceful shutdown
+    process.on("SIGINT", async () => {
+      console.log("🛑 Shutting down AlbumWorker...");
+      await worker.close();
+      await pub.quit();
+      await sub.quit();
+      process.exit(0);
     });
 
   } catch (err) {
-    console.error("Failed to initialize worker:", err.message);
+    console.error("🚫 Album worker init failed:", err.message);
   }
 })();
-

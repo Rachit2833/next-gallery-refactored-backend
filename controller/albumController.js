@@ -2,84 +2,125 @@ const  mongoose  = require("mongoose");
 const Album = require("../Schema/albumSchema");
 const SharedLink = require("../Schema/sharedLink");
 const { albumQueue } = require("../lib/blur-queue");
-
-
+const { createClient } = require("redis");
+const pub = createClient({ url: process.env.REDIS_URL });
+pub.connect(); // Ideally move this outside for global reuse
 async function getAllAlbum(req, res) {
   const query = { ...req.query };
-  const reservedNames = ["sort", "page", "limit", "fields",];
-  reservedNames.forEach((el) => {
-    delete query[el];
-  });
+  const reservedNames = ["sort", "page", "limit", "fields"];
+  reservedNames.forEach((el) => delete query[el]);
+
   try {
-    if (query.year?.toLowerCase() === "all" || query?.year === undefined) {
-      const albums = await Album.find();
+    // Ensure only user's albums are fetched
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    // Always filter by userID
+    query.userID = req.user._id;
+
+    // Handle 'year' filter
+    if (query.year?.toLowerCase() === "all" || query.year === undefined) {
+      let albumsQuery = Album.find({ userID: req.user._id });
+
+      // Apply sort
+      albumsQuery = req.query.sort
+        ? albumsQuery.sort(req.query.sort)
+        : albumsQuery.sort({ _id: -1 });
+
+      const albums = await albumsQuery;
       return res.status(200).json({ albums });
     }
+
+    // Apply year range filter
     if (query.year) {
       const year = parseInt(query.year, 10);
-      const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`); 
+      const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`);
       const endOfYear = new Date(`${year + 1}-01-01T00:00:00.000Z`);
       query.Date = { $gte: startOfYear, $lt: endOfYear };
       delete query.year;
     }
-    const albums = await Album.find(query);
 
+    let albumsQuery = Album.find(query);
+
+    // Apply sort
+    albumsQuery = req.query.sort
+      ? albumsQuery.sort(req.query.sort)
+      : albumsQuery.sort({ _id: -1 });
+
+    const albums = await albumsQuery;
     return res.status(200).json({ albums });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 }
+
+
 async function addNewAlbum(req, res) {
-  try {  
-    // const { getImageBlurred } = await import("../lib/util.mjs");
-    // req.body.blurredImage = await getImageBlurred(req.body.ImageUrl);
-    // const newAlbum = new Album(req.body); // Use req.body instead of req.data
-    // const album = await newAlbum.save();
-    
+  try {
     const Name = req.body.Name || "";
     const Description = req.body.Description || "";
-    const image = req.files[0]
-    albumQueue.add("Add-Album",{
-      image,
-      meta:{
-        Name,Description
-      }
-    })
-    res.status(200).json({
-      message: "Album Saved",
-      // data: album,
-    });
+    const image = req.files?.[0]; // Safe optional chaining
+   console.log(image);
+    if (image && image.mimetype.startsWith("image/")) {
+      console.log(1);
+      // Queue image album creation for processing
+      albumQueue.add("Add-Album", {
+        image,
+        meta: {
+          Name,
+          Description,
+          userID: req.user._id,
+        },
+      });
+      await pub.publish("trigger-album-worker", "go");
+      return res.status(200).json({
+        message: "Album queued for processing",
+      });
+    } else {
+      // No image — create album immediately with fallback
+      const randomFallbackImage = Math.floor(Math.random() * 25); // Adjust logic if needed
+      console.log(2,randomFallbackImage);
+      const albumDoc = new Album({
+        userID: req.user._id,
+        ImageUrl: randomFallbackImage.toString(),
+        Name,
+        Description,
+        blurredImage:
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAMklEQVR4nAEnANj/AAwNOwENPwEAMQQDNwD+///L2eTO2ub+//8A/v395ejt5enu/v39Q/QXhr/juNAAAAAASUVORK5CYII=",
+      });
 
+      const album = await albumDoc.save();
+
+      return res.status(200).json({
+        message: "Album saved ",
+        data: album,
+      });
+    }
   } catch (error) {
-    console.error(error);
-    res.status(400).json({
-      message: "Something Went Wrong",
+    console.error("Error in addNewAlbum:", error);
+
+    return res.status(400).json({
+      message: "Something went wrong",
       error: error.message,
     });
   }
 }
 
+
 async function addImageToAlbum(req, res) {
   try {
-    console.log(1);
     const albumId = new mongoose.Types.ObjectId(req.params.id);
     const { photoArray } = req.body;
-    console.log(2);
-
     if (!photoArray || !Array.isArray(photoArray) || photoArray.length === 0) {
-      console.log(3);
+
       return res.status(400).json({ message: "Invalid or empty image array" });
     }
-    console.log(4);
-
-    const album = await Album.findById(albumId);
-    console.log(5);
+    console.log(albumId,req.user._id," mn");
+    const album = await Album.findOne({ _id: albumId, userID: req.user._id });
     if (!album) {
-      console.log(6);
       return res.status(404).json({ message: "Album not found" });
     }
-    console.log(7);
-
     const existingImages = new Set(album.Images.map((id) => id.toString())); // Convert existing images to Set for quick lookup
     const newImages = [];
     const duplicateImages = [];
@@ -87,9 +128,9 @@ async function addImageToAlbum(req, res) {
     console.log("Received photoArray:", photoArray);
 
     // Filter out invalid and duplicate images
-    photoArray.forEach((photoId) => {
-      console.log("Processing:", photoId);
-      const photoStr = String(photoId);
+    photoArray.forEach((photo) => {
+      console.log("Processing:", photo.id);
+      const photoStr = String(photo.id);
 
       // Validate ObjectId format
       if (!mongoose.Types.ObjectId.isValid(photoStr)) {
@@ -142,45 +183,76 @@ async function addImageToAlbum(req, res) {
   }
 }
 
-async function getAlbumById(req,res) {
-  let _id = new mongoose.Types.ObjectId(String(req.params.id));
-
- try {
-  let data = await Album.find(_id)
-   res.status(200).json({
-     data,
-   });
- } catch (error) {
-   res.status(400).json({
-     message: "Something Went Wrong",
-     error: error.message,
-   });
- }
-}
-async function deleteAlbum(req, res) {
-  const id = new mongoose.Types.ObjectId(String(req.params.id));
-  const data = await Album.findById(id).deleteOne();
-  res.status(200).json({
-    message: "Album Deleted",
-    data: data,
-  });
-}
-async function getAlbumImages(req, res) {
-  const id = new mongoose.Types.ObjectId(String(req.params.id));
-  const yearFilter = req.query.year;
+async function getAlbumById(req, res) {
+  const _id = new mongoose.Types.ObjectId(String(req.params.id));
 
   try {
-    let data;
+    const data = await Album.findOne({
+      _id,
+      userID: req.user._id,
+    });
 
-    // Use aggregation pipeline for both year-specific and "all" cases
+    if (!data) {
+      return res.status(404).json({ message: "Album not found or unauthorized" });
+    }
+
+    res.status(200).json({ data });
+  } catch (error) {
+    res.status(400).json({
+      message: "Something went wrong",
+      error: error.message,
+    });
+  }
+}
+
+async function deleteAlbum(req, res) {
+  try {
+    const id = new mongoose.Types.ObjectId(String(req.params.id));
+
+    // Ensure album belongs to the user and delete it
+    const data = await Album.findOneAndDelete({
+      _id: id,
+      userID: req.user._id,
+    });
+
+    if (!data) {
+      return res.status(404).json({ message: "Album not found or unauthorized" });
+    }
+
+    res.status(200).json({
+      message: "Album Deleted",
+      data,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+      error: error.message,
+    });
+  }
+}
+
+async function getAlbumImages(req, res) {
+  try {
+    const albumId = new mongoose.Types.ObjectId(String(req.params.id));
+    const yearFilter = req.query.year;
+
+    // ✅ Ownership check
+    const album = await Album.findOne({ _id: albumId, userID: req.user._id });
+    if (!album) {
+      return res.status(403).json({ message: "Unauthorized or album not found" });
+    }
+
+    // 🎯 Aggregation pipeline
     const aggregationPipeline = [
       {
-        $match: { _id: id },
+        $match: {
+          _id: albumId,
+          userID: req.user._id,
+        },
       },
       {
         $project: {
           Images: 1,
-          _id: 0,
         },
       },
       { $unwind: "$Images" },
@@ -219,7 +291,7 @@ async function getAlbumImages(req, res) {
             Description: "$imageDetails.Description",
             Date: "$imageDetails.Date",
             People: "$imageDetails.People",
-            blurredImage:"$imageDetails.blurredImage"
+            blurredImage: "$imageDetails.blurredImage",
           },
         },
       },
@@ -231,49 +303,60 @@ async function getAlbumImages(req, res) {
     });
 
     // Execute aggregation
-    data = await Album.aggregate(aggregationPipeline);
+    let data = await Album.aggregate(aggregationPipeline);
 
-    // If no yearFilter or "all" is used, include images from all years
+    // Flatten or keep grouped
     if (!yearFilter || yearFilter === "all") {
-      // Flatten all images across years into a single array
       const allImages = data.flatMap((yearGroup) => yearGroup.Images);
       data = { _id: "all", Images: allImages };
     } else {
-      // Use the grouped data from aggregation
       data = data[0] || { _id: yearFilter, Images: [] };
     }
 
     res.status(200).json({ data });
   } catch (error) {
+    console.error("Error in getAlbumImages:", error);
     res.status(400).json({
       message: "Something Went Wrong",
       error: error.message,
     });
   }
 }
+
 async function generateLinkAlbum(req, res) {
   try {
-    console.log(1);
-
-    if (!req.body.shareById || !req.body.albumId) {
+    const { shareById, albumId } = req.body;
+    if (!shareById || !albumId) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-    const sharedById = new mongoose.Types.ObjectId(req.body.shareById);
-    const albumId = new mongoose.Types.ObjectId(req.body.albumId);
-    const newLink = new SharedLink({ albumId, sharedById });
+    const sharedById = new mongoose.Types.ObjectId(shareById);
+    const albumObjectId = new mongoose.Types.ObjectId(albumId);
+    const album = await Album.findOne({
+      _id: albumObjectId,
+      userID: req.user._id,
+    });
+
+    if (!album) {
+      return res.status(403).json({ message: "Not authorized to share this album" });
+    }
+
+    // ✅ Create share link
+    const newLink = new SharedLink({ albumId: albumObjectId, sharedById });
     const data = await newLink.save();
+
     res.status(200).json({
-      message: "Link Generated",
+      message: "Link generated successfully",
       data,
     });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({
-      message: "Something Went Wrong",
+      message: "Something went wrong",
       error: error.message,
     });
   }
 }
+
 
 module.exports = {
   generateLinkAlbum,

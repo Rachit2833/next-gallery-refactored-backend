@@ -7,13 +7,13 @@ router.route("/mass").post(upload.array("images"),massUpload).get((req,res)=>{
 })
 router.route("/").get(getAllImages).post(upFun,uploadToStorage,addNewImage).delete(deleteImage)
 router.route("/all").delete(deleteAllImages)
-router.route("/favourite").get(getAllFavouriteImages)
+// router.route("/favourite").get(getAllFavouriteImages)
 router.route("/share").post(generateLink).get(getLinkData)
 router.route("/share/images").post(duplicateImages)
 router.route("/location").get(getAllLocations);
 router.route("/search").get(searchImages);
 router.route("/loc").get(getAllImagesForLocation);
-router.route("/friend/share").get(getShareImages).delete(deleteImageFromYou);
+// router.route("/friend/share").get(getShareImages).delete(deleteImageFromYou);
 router.route("/upload").post(upFun,uploadToStorage,(req,res)=>{
  return res.status(200).json({ mes:"Success" });
 });

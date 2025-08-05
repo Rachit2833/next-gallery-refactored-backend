@@ -1,3 +1,4 @@
+const sharp = require("sharp");
 const mongoose = require("mongoose");
 const Image = require("../Schema/imageSchema");
 const Label = require("../Schema/labelSchema");
@@ -7,6 +8,7 @@ const uploadFile = require("../upload");
 const { json } = require("body-parser");
 const { blurQueue, uploadQueue } = require("../lib/blur-queue");
 const { createClient } = require("redis");
+
 
 
 const storage = multer.memoryStorage();
@@ -48,16 +50,59 @@ async function uploadToStorage(req, res, next) {
     next(error);
   }
 }
+
+
+async function uploadToStorage(req, res, next) {
+  try {
+    if (!req.file) {
+      throw new Error("No file uploaded");
+    }
+
+    console.log(req.body, "📦 Incoming file metadata");
+
+    const inputBuffer = req.file.buffer;
+    const originalName = `Rachit2833-${Date.now()}.webp`;
+
+    // Convert image to WebP using sharp
+    const webpBuffer = await sharp(inputBuffer)
+      .resize({ width: 1280 }) // Optional: resize to reduce payload
+      .webp({ quality: 80 })   // Tune quality as needed
+      .toBuffer();
+
+    // Upload the WebP image to Supabase
+    const { data, error } = await uploadFile(
+      originalName,
+      webpBuffer,
+      "image/webp"
+    );
+
+    if (error) throw new Error("Failed to upload to Supabase");
+
+    // Attach URL to request for further processing
+    req.body.ImageUrl = `https://hwhyqxktgvimgzmlhecg.supabase.co/storage/v1/object/public/Images2.0/${originalName}`;
+
+    next();
+  } catch (error) {
+    console.error("❌ Upload failed:", error.message);
+    next(error);
+  }
+}
 async function getAllImages(req, res) {
   try {
     const query = { ...req.query };
-    const page = req.query.page || 1
-    const limit = req.query.limit || 27
-    const sort = req.query.sort || -1;
-    console.log(page, limit);
-    const reservedNames = ["sort", "page", "limit", "fields"];
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 27;
+    const favourite = parseInt(req.query.favourite) || false;
+
+    let sort = -1;
+    if (req.query.sort === "_id") sort = 1;
+    if (req.query.sort === "-_id") sort = -1;
+
+    const reservedNames = ["sort", "page", "limit", "fields", "pdt"];
     reservedNames.forEach((param) => delete query[param]);
+
     const filter = {};
+
     if (query.year && query.year?.toLowerCase() !== "all") {
       const year = parseInt(query.year, 10);
       if (!isNaN(year)) {
@@ -67,30 +112,41 @@ async function getAllImages(req, res) {
       }
       delete query.year;
     }
+
+    if (query.favourite) {
+      filter["Favourite"] = true;
+      delete query.favourite;
+    }
+
     if (query.cod?.toLowerCase() !== "all" && query.cod) {
       filter["Location.name"] = { $regex: query.cod, $options: "i" };
       delete query.cod;
     }
+
     if (query.frId) {
       const id = new mongoose.Types.ObjectId(query.frId);
-      filter["People"] = id; // or { $eq: id }
+      filter["People"] = id;
+      delete query.frId;
     }
-    console.log(filter)
+    filter["userID"] = new mongoose.Types.ObjectId(req.user._id);
 
-
-    delete query.frId;
-    const images = await Image.find(filter)
-      .sort({ _id: 1 })
+    const baseQuery = Image.find(filter)
+      .sort({ _id: sort })
       .skip((page - 1) * limit)
-      .limit(limit)
-      .populate("People")
-      .populate("sharedBy");
-    console.log(images.length);
-    const count = await Image.countDocuments()
-    const leftPage = (count - (page) * limit)
-    return res.status(200).json({ images, leftPage, });
+      .limit(limit);
+
+    // Conditionally populate People
+    if (req.query.pdt === "true") {
+      baseQuery.populate("People");
+    }
+
+    const images = await baseQuery.populate("sharedBy");
+
+    const count = await Image.countDocuments(filter);
+    const leftPage = count - page * limit;
+
+    return res.status(200).json({ images, leftPage });
   } catch (error) {
-    // Handle errors and respond with a message
     return res.status(500).json({
       error: "Failed to fetch images",
       details: error.message,
@@ -98,8 +154,12 @@ async function getAllImages(req, res) {
   }
 }
 
+
+
 const pub = createClient({ url: process.env.REDIS_URL });
 pub.connect(); // Ideally move this outside for global reuse
+
+
 
 async function massUpload(req, res) {
   try {
@@ -112,32 +172,44 @@ async function massUpload(req, res) {
     const favourite = req.body.Favourite === "true";
     const people = JSON.parse(req.body.People || "[]");
     const detection = req.body.detection;
+    const userID = req.user._id;
+    console.log(userID,"hello world");
     const name = "UploadJob";
 
     if (!Array.isArray(req.files) || req.files.length === 0) {
       return res.status(400).json({ error: "No images uploaded" });
     }
 
-    const jobs = await uploadQueue.addBulk(
-      req.files.map((file) => ({
-        name,
-        data: {
-          image: {
-            originalname: file.originalname,
-            mimetype: file.mimetype,
-            buffer: file.buffer,
-          },
-          meta: {
-            location,
-            description,
-            country,
-            favourite,
-            people,
-            detection,
-          },
+    let jobCount = 0;
+
+    for (const file of req.files) {
+      // 🔧 Compress image using sharp
+      const compressedBuffer = await sharp(file.buffer)
+        .resize({ width: 1024 }) // Optional: resize to reduce size
+        .jpeg({ quality: 75 }) // You can adjust quality
+        .toBuffer();
+
+      console.log(`📏 Original: ${file.buffer.length} → Compressed: ${compressedBuffer.length} bytes`);
+
+      await uploadQueue.add(name, {
+        image: {
+          originalname: file.originalname,
+          mimetype: "image/jpeg", // update mimetype if converted
+          buffer: compressedBuffer,
         },
-      }))
-    );
+        meta: {
+          location,
+          description,
+          country,
+          favourite,
+          people,
+          detection,
+          userID,
+        },
+      });
+
+      jobCount++;
+    }
 
     // 🔔 Trigger worker
     await pub.publish("trigger-upload-worker", "run");
@@ -151,7 +223,7 @@ async function massUpload(req, res) {
       country,
       favourite,
       peopleCount: people.length,
-      jobCount: jobs.length,
+      jobCount,
     });
   } catch (error) {
     console.error("❌ Error in /image/mass:", error);
@@ -166,9 +238,8 @@ async function massUpload(req, res) {
 async function addNewImage(req, res) {
   try {
     req.body.Location = JSON.parse(req.body.Location);
-    // const { getImageBlurred } = await import("../lib/util.mjs");
-    // req.body.blurredImage = await getImageBlurred(req.body.ImageUrl);
-
+    req.body.userID = new mongoose.Types.ObjectId(req.user._id);
+    console.log(req.body, "req.body in addNewImage");
     const newImage = new Image(req.body);
     const image = await newImage.save();
 
@@ -177,11 +248,6 @@ async function addNewImage(req, res) {
       _id: image._id,
       ImageUrl: image.ImageUrl
     })
-    console.log({
-      type: "Image",
-      _id: image._id,
-      ImageUrl: image.ImageUrl
-    }, "added to queue");
     res.status(200).json({
       message: "Image Saved",
       data: image,
@@ -206,6 +272,7 @@ async function getAllImagesForLocation(req, res) {
     const filter = query.cod
       ? { "Location.name": { $regex: query.cod, $options: "i" } }
       : {};
+      filter["userID"] = new mongoose.Types.ObjectId(req.user._id);
 
     // Find images that match the Location filter
     const data = await Image.find(filter);
@@ -226,6 +293,7 @@ async function getAllLocations(req, res) {
     const data = await Image.aggregate([
       {
         $match: {
+          userID: req.user._id,
           Date: {
             $gte: new Date(`${timeRange === "All" ? 1800 : year - timeRange}-01-01`),
             $lte: new Date(`${year}-12-31`),
@@ -289,127 +357,214 @@ async function deleteImage(req, res) {
   const id = req.query.img_id;
   console.log(id);
   try {
-    const data = await Image.findById(id).deleteOne()
-    res.status(200).json({
-      data
-    });
+    const image = await Image.findById(id);
+
+    if (!image) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+
+    // Assuming image.userID is the field that stores the owner's ID
+    if (image.userID?.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const data = await image.deleteOne();
+
+    return res.status(200).json({ data });
   } catch (error) {
-    res.status(400).json({
-      message: "Something Went Wrong"
-    })
+    console.error(error);
+    return res.status(400).json({ message: "Something Went Wrong" });
   }
 }
+
+
 async function deleteAllImages(req, res) {
   try {
     const ids = req.body.idArray;
-    const data = await Image.deleteMany({ _id: { $in: ids } });
-    console.log(data);
+
+    // Filter out invalid ObjectIds
+    const validIds = ids.filter((id) => mongoose.Types.ObjectId.isValid(id));
+    console.log(validIds, "validIds");
+    // Find all images with the given IDs
+    const images = await Image.find({ _id: { $in: validIds } });
+
+    // Filter only those images that belong to the logged-in user
+    const userOwnedImageIds = images
+      .filter((img) => img.userID?.toString() === req.user._id?.toString())
+      .map((img) => img._id);
+
+    if (userOwnedImageIds.length === 0) {
+      return res.status(403).json({ message: "No authorized images to delete" });
+    }
+
+    // Delete only images that the user owns
+    const data = await Image.deleteMany({ _id: { $in: userOwnedImageIds } });
+
     res.status(200).json({
-      message: "All images deleted successfully",
-      deletedCount: data.deletedCount, // Number of deleted images
+      message: "Your images were deleted successfully",
+      deletedCount: data.deletedCount,
     });
   } catch (error) {
+    console.error(error);
     res.status(400).json({
-      message: "Something Went Wrong",
+      message: "Something went wrong",
     });
   }
 }
+
+
 
 async function setAndUnsetFavourite(req, res) {
-  const id = new mongoose.Types.ObjectId(String(req.params.id));
+  const id = new mongoose.Types.ObjectId(req.params.id);
   const favValue = req.body.Favourite;
-  console.log(favValue, "kbjn");
+  const userId = new mongoose.Types.ObjectId(req.user._id);
+  console.log(userId, "userId in setAndUnsetFavourite");
+  console.log(id, "id in setAndUnsetFavourite");
   try {
-    const data = await Image.findByIdAndUpdate(id, { Favourite: favValue }, { new: true });
+    const data = await Image.findOneAndUpdate(
+      { _id: id, userID: userId }, // Ensure user owns the image
+      { Favourite: favValue },
+      { new: true }
+    );
+    console.log(data, "data in setAndUnsetFavourite");
+
+    if (!data) {
+      return res.status(403).json({
+        message: "Unauthorized or Image not found",
+      });
+    }
+
     res.status(200).json({
       message: "Success",
-      data: data
+      data: data,
     });
   } catch (error) {
+    console.error("Update error:", error);
     res.status(400).json({
       message: "Something Went Wrong",
     });
   }
 }
+
 async function searchImages(req, res) {
   const query = req.query.query;
+
   try {
-    const LocationData = await Image.aggregate(
-      [
-        {
-          $search: {
-            index: "default3",
-            autocomplete: {
-              query,
-              path: "Location.name",
-            },
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            Location: {
-              $addToSet: "$Location.name",
-            },
-            data: {
-              $push: {
-                _id: "$_id",
-                ImageUrl: "$ImageUrl",
-                Country: "$Country",
-                Favourite: "$Favourite",
-                Location: "$Location",
-                Description: "$Description",
-                People: "$People",
-                Date: "$Date",
-                __v: "$__v",
+
+    const userId = new mongoose.Types.ObjectId(req.user._id); // ensure it's ObjectId
+console.log(userId);
+    const LocationData = await Image.aggregate([
+      {
+        $search: {
+          index: "default3",
+          compound: {
+            must: [
+              {
+                autocomplete: {
+                  query: query,
+                  path: "Location.name",
+                },
               },
+            ],
+            filter: [
+              {
+                equals: {
+                  path: "userID",
+                  value: userId,
+                },
+              },
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          Location: { $addToSet: "$Location.name" },
+          data: {
+            $push: {
+              _id: "$_id",
+              ImageUrl: "$ImageUrl",
+              Country: "$Country",
+              Favourite: "$Favourite",
+              Location: "$Location",
+              Description: "$Description",
+              People: "$People",
+              Date: "$Date",
+              __v: "$__v",
             },
           },
         },
-      ],
-      { maxTimeMS: 60000, allowDiskUse: true }
-    );
-    const DesData = await Image.aggregate(
-      [
-        {
-          $search: {
-            index: "Description",
-            autocomplete: {
-              query,
-              path: "Description",
-            },
+      },
+    ]);
+
+    // Description search
+    const DesData = await Image.aggregate([
+      {
+        $search: {
+          index: "Description",
+          compound: {
+            must: [
+              {
+                autocomplete: {
+                  query,
+                  path: "Description",
+                },
+              },
+            ],
+            filter: [
+              {
+                equals: {
+                  path: "userID",
+                  value: userId,
+                },
+              },
+            ],
           },
         },
-      ],
-      { maxTimeMS: 60000, allowDiskUse: true }
-    );
-    const peopleData = await Label.aggregate(
-      [
-        {
-          $search: {
-            index: "People",
-            autocomplete: {
-              query: query,
-              path: "label",
-            },
+      },
+    ]);
+
+    // People label search
+    const peopleData = await Label.aggregate([
+      {
+        $search: {
+          index: "People",
+          compound: {
+            must: [
+              {
+                autocomplete: {
+                  query,
+                  path: "label",
+                },
+              },
+            ],
+            filter: [
+              {
+                equals: {
+                  path: "userID",
+                  value: userId,
+                },
+              },
+            ],
           },
         },
-        {
-          $project: {
-            descriptors: 0,
-          },
+      },
+      {
+        $project: {
+          descriptors: 0,
         },
-      ],
-      { maxTimeMS: 60000, allowDiskUse: true }
-    );
+      },
+    ]);
+
     res.status(200).json({
       message: "Success",
-      DesData,
       LocationData,
-      peopleData
+      DesData,
+      peopleData,
     });
-
   } catch (error) {
+    console.error("Search error:", error);
     res.status(400).json({
       message: "Something Went Wrong",
     });
@@ -417,17 +572,29 @@ async function searchImages(req, res) {
 }
 async function generateLink(req, res) {
   try {
+    const sharedById = req.user._id;
+    const uniqueIdStrings = [...new Set(req.body.imgIds)]; // deduplicate strings
+    const ids = uniqueIdStrings.map((id) => new mongoose.Types.ObjectId(id));
+    console.log(ids, "ids");
+    const images = await Image.find({
+      _id: { $in: ids },
+      userID: sharedById
+    });
+    if (images.length !== ids.length) {
+      return res.status(403).json({
+        message: "You can only share images that you own.",
+      });
+    }
 
-    const sharedById = new mongoose.Types.ObjectId(req.body.sharedById);
-    const ids = req.body.imgIds.map((id) => new mongoose.Types.ObjectId(id));
-    const newLink = new SharedLink({ imageIds: ids, sharedById: sharedById });
+    const newLink = new SharedLink({ imageIds: ids, sharedById });
     const data = await newLink.save();
-    console.log(data);
+    const url = `http://localhost:3000/share?id=${data._id}&sharedId=${sharedById}`;
     res.status(200).json({
       message: "Link Generated",
-      data,
+      link: url,
     });
   } catch (error) {
+    console.error(error);
     res.status(400).json({
       message: "Something Went Wrong",
     });
@@ -435,7 +602,7 @@ async function generateLink(req, res) {
 }
 async function getLinkData(req, res) {
   try {
-    const id = req.query.id
+    const id = req.user._id
     if (!id) {
       res.status(400).json({
         message: "Something Went Wrong",
@@ -455,7 +622,6 @@ async function getLinkData(req, res) {
 }
 async function duplicateImages(req, res) {
   try {
-    console.log(req.body.sharedById);
     const images = await Image.find({ _id: { $in: req.body.ids } });
     const newImages = images.map((item) => {
       const abc = item.toObject();

@@ -141,21 +141,31 @@ async function protect(req, res, next) {
     });
   }
 }
-async function verifyUser(req,res) {
 
-   const token = req.headers.authorization.split(" ")[1]; // Get token from cookies
-  console.log(token);
-   if (!token) {
-     return res.status(401).json({ message: "No token provided" });
-   }
+async function verifyUser(req, res) {
+  try {
+    const authHeader = req.headers.authorization;
 
-   try {
-     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-     return res.status(200).json({ valid: true, user: decoded });
-   } catch (error) {
-     return res.status(401).json({ message: "Invalid or expired token" });
-   }
-  
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      // User not found in DB
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // User found
+    return res.status(200).json({ valid: true, user });
+  } catch (error) {
+    console.error("Verification error:", error);
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
 }
 
 

@@ -9,10 +9,10 @@ const faceapi = require("@vladmandic/face-api");
 const chalk = require("chalk");
 const { createClient } = require("redis");
 const connection = require("./lib/redis-clinet.js");
+const { default: mongoose } = require("mongoose");
 
 dotenv.config({ path: "../config.env" });
 
-// Monkey patch for face-api
 const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
 
@@ -42,7 +42,7 @@ async function loadModels(modelPath = './public/weights') {
       "FaceIdQueue",
       async (job) => {
         console.log(chalk.blue(`📥 Job ${job.id} received`));
-        const { blurredImage, ImageUrl, userId, _id } = job.data;
+        const { blurredImage, ImageUrl, userID, _id } = job.data;
 
         await loadModels('./public/weights');
 
@@ -52,7 +52,9 @@ async function loadModels(modelPath = './public/weights') {
           return new faceapi.LabeledFaceDescriptors(`${entry.label}/${entry._id}`, descriptors);
         });
 
-        const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
+        const hasLabels = labeledFaceDescriptors.length > 0;
+        const faceMatcher = hasLabels ? new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6) : null;
+
         const img = await canvas.loadImage(ImageUrl);
         const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
           .withFaceLandmarks()
@@ -62,45 +64,58 @@ async function loadModels(modelPath = './public/weights') {
         const newlyCreatedIds = [];
 
         for (const fd of detections) {
-          const match = faceMatcher.findBestMatch(fd.descriptor);
-          const matchedId = match.label.split("/")[1];
-          const isNewlyCreated = newlyCreatedIds.includes(matchedId);
+          let match = null;
+          let isNewLabel = false;
 
-          if (match.label === 'unknown' || isNewlyCreated || match.distance > 0.6) {
-            const timestamp = new Date().toISOString().replace(/\.\d{3}Z$/, '');
-            const generatedLabel = `User-${timestamp}`;
+          if (faceMatcher) {
+            match = faceMatcher.findBestMatch(fd.descriptor);
+            const matchedId = match.label.split("/")[1];
+            const isNewlyCreated = newlyCreatedIds.includes(matchedId);
 
-            const newLabel = new Label({
-              label: generatedLabel,
-              descriptors: [Array.from(fd.descriptor)],
-              userId: userId || 'unassigned',
-              blurredImage: blurredImage || 'N/A',
-              ImageUrl: ImageUrl || 'N/A',
-            });
+            if (match.label === 'unknown' || isNewlyCreated || match.distance > 0.6) {
+              isNewLabel = true;
+            }
 
-            const saved = await newLabel.save();
-            newlyCreatedIds.push(saved._id.toString());
-
-            await blurQueue.add("Blur Generator", {
-              type: "People",
-              _id: saved._id,
-              ImageUrl,
-            });
-
-            results.push({
-              _id: saved._id,
-              label: saved.label,
-              distance: match.distance,
-              box: fd.detection.box
-            });
+            if (!isNewLabel) {
+              results.push({
+                _id: matchedId,
+                label: match.label.split("/")[0],
+                distance: match.distance,
+                box: fd.detection.box,
+              });
+              continue; // Skip new label creation
+            }
           } else {
-            results.push({
-              _id: matchedId,
-              label: match.label.split("/")[0],
-              distance: match.distance,
-              box: fd.detection.box
-            });
+            isNewLabel = true;
           }
+
+          // Create new label if no match or no matcher exists
+          const timestamp = new Date().toISOString().replace(/\.\d{3}Z$/, '');
+          const generatedLabel = `User-${timestamp}`;
+
+          const newLabel = new Label({
+            label: generatedLabel,
+            descriptors: [Array.from(fd.descriptor)],
+            userID: new  mongoose.Types.ObjectId(userID),
+            blurredImage: blurredImage || 'N/A',
+            ImageUrl: ImageUrl || 'N/A',
+          });
+
+          const saved = await newLabel.save();
+          newlyCreatedIds.push(saved._id.toString());
+
+          await blurQueue.add("Blur Generator", {
+            type: "People",
+            _id: saved._id,
+            ImageUrl,
+          });
+
+          results.push({
+            _id: saved._id,
+            label: saved.label,
+            distance: match?.distance ?? null,
+            box: fd.detection.box,
+          });
         }
 
         await SchemaImage.updateOne(
@@ -117,7 +132,6 @@ async function loadModels(modelPath = './public/weights') {
       }
     );
 
-    // Job lifecycle events
     worker.on("active", (job) => {
       activeJobs++;
       console.log(`⚙️ FaceId Job ${job.id} started. Active jobs: ${activeJobs}`);
