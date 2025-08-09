@@ -354,7 +354,8 @@ async function getImageById(req, res) {
   }
 }
 async function deleteImage(req, res) {
-  const id = req.query.img_id;
+    let  ids = req.body.idArray;
+    ids = ids.map((id)=>id.id)
   console.log(id);
   try {
     const image = await Image.findById(id);
