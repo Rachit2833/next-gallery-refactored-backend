@@ -19,7 +19,6 @@ async function addNewLabel(req, res) {
     const newData = req.body;
     const newLabel = new Label(newData);
     const doc = await newLabel.save();
-    console.log(doc, "new doc");
     res.status(201).json({ message: "Label created successfully", label: doc });
   } catch (e) {
     console.error(e);
@@ -47,7 +46,6 @@ function deleteLabel (req, res){
 
     // Filter out the labelName
     jsonArray = jsonArray.filter((data) => data.label !== labelName);
-    console.log(jsonArray);
     // Write the updated data back to the JSON file
     fs.writeFile(
       "../next-gallery/public/abc.json",
@@ -108,13 +106,11 @@ async function updateLabel(req, res) {
         })
       }
       let id = req.params.id;
-      console.log(id);
      const resData = await Label.findByIdAndUpdate(id, req.body,{new:true});
     res.status(200).json({
       message: "Success",
       resData
     });
-    console.log(id);
   } catch (error) {
     console.error(error);
   }

@@ -20,7 +20,6 @@ async function sendMessage(req, res) {
   try {
     
     const newData = req.body;
-    console.log(newData,"dbkhsabdjhsd");
     const receiverId = newData.receiverId;
     const senderId   = newData.senderId
     const receiverSocket = getReceiverSocketId(receiverId);
@@ -30,7 +29,6 @@ async function sendMessage(req, res) {
         content:newData.content
       });
     } else {
-      console.log("Receiver is offline, message not sent via socket.");
     }
      const newLabel = new Message(newData);
      const data = await newLabel.save();
@@ -55,7 +53,6 @@ async function addGroup(req,res) {
       message:"Group Add Successfully"
     })
   } catch (error) {
-    console.log(5);
     console.error(error);
     res.status(500).json({
       message:"Something Went Wrong"
@@ -97,7 +94,6 @@ async function updateGroup(req, res) {
     const {  groupId } = req.query;
     const {removeUser,addUser,changeName,changeDescription}= req.body
     const data =  await Group.findById(groupId)
-    console.log("sadnasj",addUser);
    if(!data){
     return res
         .status(400)
@@ -222,7 +218,6 @@ async function sendGroupMessage(req, res) {
     }
  async function generateGroupInvite(req,res) {
       try {
-        console.log(req.body,"hello");
          const inviteId= req.body.inviteId
          const sharedById= req.body.shareById
          const newLink = new SharedLink({inviteId,sharedById})

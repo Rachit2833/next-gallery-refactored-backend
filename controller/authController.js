@@ -3,7 +3,6 @@ const User = require("../Schema/userSchema");
 const jwt = require('jsonwebtoken')
 async function useLoginTemporary(req, res) {
   const { userId } = req.body;
-  console.log("Working", userId);
 
   if (!userId) {
     return res.status(400).json({ message: "User ID is required" });
@@ -22,7 +21,6 @@ async function useLoginTemporary(req, res) {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    console.log("Set-Cookie Header:", res.getHeaders()["set-cookie"]); // Debugging
 
     res.send("userId cookie has been set!");
   } catch (error) {
@@ -80,14 +78,12 @@ async function createNewUser(req, res) {
 async function login(req,res){
   try {
       const {email,password}= req.body
-      console.log(email,password,"sdfds");
       if(!email || !password){
         return res.status(400).json({
           message:"Please Provide Email and Password"
         })
       }
      const user= await User.findOne({email}).select("+password")
-     console.log(user,"user");
      const compare = user.comparePassword(user.password,password)
      if(!compare){
        return res.status(400).json({

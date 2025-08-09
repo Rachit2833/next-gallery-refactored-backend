@@ -83,7 +83,6 @@ async function verifyAutoSend(req, res) {
 }
 async function updateAutoSend(req, res) {
   try {
-    console.log(req.query.relationId);
 
     if (!req.query.relationId) {
       return res.status(400).json({ message: "Relation ID is required" });
@@ -109,7 +108,6 @@ async function updateAutoSend(req, res) {
         query["autoSend.friendId.descriptorId"] = new mongoose.Types.ObjectId(req.body.descriptorID);
       }
     }
-    console.log(query);
 
     if (Object.keys(query).length === 0) {
       return res
@@ -124,10 +122,8 @@ async function updateAutoSend(req, res) {
     );
 
     if (!data) {
-      console.log("2");
       return res.status(404).json({ message: "Relation not found" });
     }
-    console.log(data,"1");
     res.status(200).json({ message: "Auto-send updated successfully", data });
   } catch (error) {
     console.error(error);

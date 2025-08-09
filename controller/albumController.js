@@ -61,9 +61,7 @@ async function addNewAlbum(req, res) {
     const Name = req.body.Name || "";
     const Description = req.body.Description || "";
     const image = req.files?.[0]; // Safe optional chaining
-   console.log(image);
     if (image && image.mimetype.startsWith("image/")) {
-      console.log(1);
       // Queue image album creation for processing
       albumQueue.add("Add-Album", {
         image,
@@ -80,7 +78,6 @@ async function addNewAlbum(req, res) {
     } else {
       // No image — create album immediately with fallback
       const randomFallbackImage = Math.floor(Math.random() * 25); // Adjust logic if needed
-      console.log(2,randomFallbackImage);
       const albumDoc = new Album({
         userID: req.user._id,
         ImageUrl: randomFallbackImage.toString(),
@@ -116,7 +113,6 @@ async function addImageToAlbum(req, res) {
 
       return res.status(400).json({ message: "Invalid or empty image array" });
     }
-    console.log(albumId,req.user._id," mn");
     const album = await Album.findOne({ _id: albumId, userID: req.user._id });
     if (!album) {
       return res.status(404).json({ message: "Album not found" });
@@ -124,34 +120,26 @@ async function addImageToAlbum(req, res) {
     const existingImages = new Set(album.Images.map((id) => id.toString())); // Convert existing images to Set for quick lookup
     const newImages = [];
     const duplicateImages = [];
-    console.log(8);
-    console.log("Received photoArray:", photoArray);
 
     // Filter out invalid and duplicate images
     photoArray.forEach((photo) => {
-      console.log("Processing:", photo.id);
       const photoStr = String(photo.id);
 
       // Validate ObjectId format
       if (!mongoose.Types.ObjectId.isValid(photoStr)) {
-        console.log("Invalid ObjectId:", photoStr);
         return;
       }
 
       if (existingImages.has(photoStr)) {
-        console.log("Duplicate image found:", photoStr);
         duplicateImages.push(photoStr);
       } else {
-        console.log("Adding new image:", photoStr);
         newImages.push(new mongoose.Types.ObjectId(photoStr));
       }
     });
 
-    console.log(9);
 
     // If no new images, return early with a duplicate warning
     if (newImages.length === 0) {
-      console.log(10);
       return res.status(200).json({
         message: "No new images added. All were duplicates or invalid.",
         addedImages: 0,
@@ -168,7 +156,6 @@ async function addImageToAlbum(req, res) {
         updatedAt: new Date(),
       }
     );
-    console.log("Update response:", data);
 
     const updatedAlbum = await Album.findById(albumId);
     res.status(200).json({

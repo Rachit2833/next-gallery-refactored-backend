@@ -25,7 +25,6 @@ const upload = multer({
 })
 const upFun = upload.single("photo");
 async function test2(req, res, next) {
-  console.log(req.body, "sdssas");
   next()
 }
 async function uploadToStorage(req, res, next) {
@@ -33,11 +32,9 @@ async function uploadToStorage(req, res, next) {
     if (!req.file) {
       throw new Error("No File upload failed");
     }
-    console.log(req.body, " bmnm");
     const extension = req.file.mimetype.split('/')[1]
     const fileBuffer = req.file.buffer;
     const originalName = `Rachit2833-${Date.now()}.${extension}`
-    console.log(fileBuffer);
     const { data, error } = await uploadFile(
       originalName,
       fileBuffer,
@@ -58,7 +55,6 @@ async function uploadToStorage(req, res, next) {
       throw new Error("No file uploaded");
     }
 
-    console.log(req.body, "📦 Incoming file metadata");
 
     const inputBuffer = req.file.buffer;
     const originalName = `Rachit2833-${Date.now()}.webp`;
@@ -163,8 +159,6 @@ pub.connect(); // Ideally move this outside for global reuse
 
 async function massUpload(req, res) {
   try {
-    console.log("📦 Uploaded Files:", req.files);
-    console.log("📝 Form Fields:", req.body);
 
     const location = req.body.LocationName || "";
     const description = req.body.Description || "";
@@ -173,7 +167,6 @@ async function massUpload(req, res) {
     const people = JSON.parse(req.body.People || "[]");
     const detection = req.body.detection;
     const userID = req.user._id;
-    console.log(userID,"hello world");
     const name = "UploadJob";
 
     if (!Array.isArray(req.files) || req.files.length === 0) {
@@ -189,7 +182,6 @@ async function massUpload(req, res) {
         .jpeg({ quality: 75 }) // You can adjust quality
         .toBuffer();
 
-      console.log(`📏 Original: ${file.buffer.length} → Compressed: ${compressedBuffer.length} bytes`);
 
       await uploadQueue.add(name, {
         image: {
@@ -213,7 +205,6 @@ async function massUpload(req, res) {
 
     // 🔔 Trigger worker
     await pub.publish("trigger-upload-worker", "run");
-    console.log("📡 Worker triggered");
 
     return res.status(200).json({
       message: "Images uploaded successfully",
@@ -239,7 +230,6 @@ async function addNewImage(req, res) {
   try {
     req.body.Location = JSON.parse(req.body.Location);
     req.body.userID = new mongoose.Types.ObjectId(req.user._id);
-    console.log(req.body, "req.body in addNewImage");
     const newImage = new Image(req.body);
     const image = await newImage.save();
 
@@ -288,7 +278,6 @@ async function getAllImagesForLocation(req, res) {
 async function getAllLocations(req, res) {
   const timeRange = req.query.yearRange;
   const year = new Date().getFullYear()
-  console.log(timeRange, year);
   try {
     const data = await Image.aggregate([
       {
@@ -319,7 +308,6 @@ async function test(req, res) {
   const { friendId } = req.query;
 
   var id = new mongoose.Types.ObjectId(String(req.query.friendId));
-  console.log("Received friendId:", id,);
 
   try {
     const images = await Image.find({
@@ -355,7 +343,6 @@ async function getImageById(req, res) {
 }
 async function deleteImage(req, res) {
   const id = req.query.img_id;
-  console.log(id);
   try {
     const image = await Image.findById(id);
 
@@ -380,15 +367,12 @@ async function deleteImage(req, res) {
 
 async function deleteAllImages(req, res) {
   try {
-    const ids = req.body.idArray;
-
-    // Filter out invalid ObjectIds
+    let  ids = req.body.idArray;
+    ids = ids.map((id)=>id.id)
+    console.log(ids);
     const validIds = ids.filter((id) => mongoose.Types.ObjectId.isValid(id));
-    console.log(validIds, "validIds");
-    // Find all images with the given IDs
+    console.log(validIds);
     const images = await Image.find({ _id: { $in: validIds } });
-
-    // Filter only those images that belong to the logged-in user
     const userOwnedImageIds = images
       .filter((img) => img.userID?.toString() === req.user._id?.toString())
       .map((img) => img._id);
@@ -418,15 +402,12 @@ async function setAndUnsetFavourite(req, res) {
   const id = new mongoose.Types.ObjectId(req.params.id);
   const favValue = req.body.Favourite;
   const userId = new mongoose.Types.ObjectId(req.user._id);
-  console.log(userId, "userId in setAndUnsetFavourite");
-  console.log(id, "id in setAndUnsetFavourite");
   try {
     const data = await Image.findOneAndUpdate(
       { _id: id, userID: userId }, // Ensure user owns the image
       { Favourite: favValue },
       { new: true }
     );
-    console.log(data, "data in setAndUnsetFavourite");
 
     if (!data) {
       return res.status(403).json({
@@ -575,7 +556,6 @@ async function generateLink(req, res) {
     const sharedById = req.user._id;
     const uniqueIdStrings = [...new Set(req.body.imgIds)]; // deduplicate strings
     const ids = uniqueIdStrings.map((id) => new mongoose.Types.ObjectId(id));
-    console.log(ids, "ids");
     const images = await Image.find({
       _id: { $in: ids },
       userID: sharedById
@@ -632,7 +612,6 @@ async function duplicateImages(req, res) {
       return abc;
     })
     const data = await Image.insertMany(newImages);
-    console.log(data);
     res.status(200).json({
       message: "Images Saved To user",
     });
@@ -644,7 +623,6 @@ async function duplicateImages(req, res) {
 async function getAllFavouriteImages(req, res) {
   try {
     const images = await Image.find({ Favourite: true })
-    console.log(images, "images")
     res.status(200).json({
       images
     })

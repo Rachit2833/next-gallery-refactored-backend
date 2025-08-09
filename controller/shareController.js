@@ -26,15 +26,12 @@ async function getShareImages(req, res) {
 async function deleteImageFromYou(req, res) {
   try {
     if (!req.query.id || !req.query.sharedId) {
-      console.log(1);
+
       return res
         .status(400)
         .json({ message: "Invalid or missing user ID or friend IDs" });
     }
-
-    console.log(2);
     const sharedId = req.query.sharedId;
-    console.log(3);
 
     const data = await Share.findByIdAndUpdate(
       req.query.id,
