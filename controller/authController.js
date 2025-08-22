@@ -32,40 +32,61 @@ async function useLoginTemporary(req, res) {
 
 
 
+
+
 async function createNewUser(req, res) {
   try {
-    const data = req.body;
-    const newUser = await User.create(data);
-    newUser.password = undefined; // Hide password in response
+    const { name, email, password } = req.body;
 
-    // Create a JWT token with expiration
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Please provide name, email, and password" });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // Create new user
+    const newUser = await User.create({ name, email, password });
+
+    // Hide password in response
+    newUser.password = undefined;
+
+    // Generate JWT token
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES || "7d", // 7 days expiration
+      expiresIn: process.env.JWT_EXPIRES || "7d",
     });
 
-    // Cookie expiration (convert days to milliseconds)
+    // Cookie expiration (28 days)
     const cookieExpires = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000);
 
-    // Set cookie options
+    // Cookie options
     const cookieOptions = {
       expires: cookieExpires,
-      httpOnly: true, // Prevents access from JavaScript
-      secure: process.env.NODE_ENV === "production", // Only use HTTPS in production
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Allow cross-site cookies in production
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      path: "/",
     };
 
-    // Set cookie in the response
-    res.cookie("jwt", token, cookieOptions);
+    // Set cookie
+    res.cookie("session", token, cookieOptions);
 
+    // Send response without exposing token
     res.status(201).json({
-      message: "User Created Successfully",
-      token,
-      user: newUser,
+      message: "User created successfully",
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+      },
     });
   } catch (error) {
     console.error("User creation error:", error);
     res.status(500).json({
-      message: "Something Went Wrong",
+      message: "Something went wrong",
       error: error.message,
     });
   }
@@ -75,34 +96,68 @@ async function createNewUser(req, res) {
 
 
 
-async function login(req,res){
+
+
+async function login(req, res) {
   try {
-      const {email,password}= req.body
-      if(!email || !password){
-        return res.status(400).json({
-          message:"Please Provide Email and Password"
-        })
-      }
-     const user= await User.findOne({email}).select("+password")
-     const compare = user.comparePassword(user.password,password)
-     if(!compare){
-       return res.status(400).json({
-         message:"Invalid Email or Password"
-       })
-     }
-      const token = jwt.sign({id:user._id},process.env.JWT_SECRET,{
-        expiresIn:process.env.JWT_EXPIRES
-      })
-      res.status(200).json({
-       token,
-       userId: user._id,
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Please Provide Email and Password",
       });
+    }
+
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid Email or Password",
+      });
+    }
+
+    // comparePassword should be await if it's async
+    const isMatch = await user.comparePassword(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Invalid Email or Password",
+      });
+    }
+
+    // Generate JWT
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES || "7d",
+    });
+
+    // Cookie expiration (28 days for example)
+    const cookieExpires = new Date(
+      Date.now() + 28 * 24 * 60 * 60 * 1000
+    );
+
+    // Set cookie options
+    const cookieOptions = {
+      expires: cookieExpires,
+      httpOnly: true, // Prevent JS access
+      secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    };
+
+    // Send cookie
+    res.cookie("session", token, cookieOptions);
+
+    // Send response without exposing token
+    res.status(200).json({
+      message: "Login successful",
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+      },
+    });
   } catch (error) {
-    console.error(error);
-     res.status(500).json({
-       message: "Something Went Wrong",
-       error,
-     });
+    console.error("Login error:", error);
+    res.status(500).json({
+      message: "Something Went Wrong",
+      error: error.message,
+    });
   }
 }
 
@@ -167,4 +222,4 @@ async function verifyUser(req, res) {
 
 
 
-module.exports={useLoginTemporary,createNewUser,login,protect,verifyUser}
+module.exports = { useLoginTemporary, createNewUser, login, protect, verifyUser }

@@ -5,7 +5,6 @@ const imageRouter= require("./routes/imageRoutes")
 const albumRouter= require("./routes/albumRoutes")
 const statsRouter= require('./routes/statsRouter')
 const userRouter = require('./routes/usersRoutes')
-const authRouter = require('./routes/authRouter')
 // const friendRouter = require('./routes/friendRouter')
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
