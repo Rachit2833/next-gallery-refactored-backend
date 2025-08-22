@@ -23,7 +23,7 @@ const server = http.createServer(app);
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://next-gallery-refactored-ba-git-451813-rachits-projects-bd5662b7.vercel.app",
     credentials: true,
   })
 );
