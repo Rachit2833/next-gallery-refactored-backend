@@ -25,7 +25,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000", 
-      "https://next-gallery-by-rachit2833.vercel.app"
+      "https://next-gallery-refactored-zxm4.vercel.app"
     ],
     credentials: true,
   })
