@@ -14,13 +14,14 @@ const sendToken = (user, statusCode, res) => {
   const cookieExpires = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000);
 
   // Cookie options
-  const cookieOptions = {
-    expires: cookieExpires,
-    httpOnly: true, // prevent JS access
-    secure: process.env.NODE_ENV === "production", // HTTPS only in prod
-    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // cross-site cookie support
-    path: "/", // important for Vercel
-  };
+ const cookieOptions = {
+  expires: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000),
+  httpOnly: true,
+  secure: true,            // HTTPS Only!
+  sameSite: "None",        // Required for cross-site cookies
+  path: "/",               // Should be root unless you have SPA routing issues
+  // domain: ".yourdomain.com" // Optional, if your backend is in a subdomain
+};
 
   // Set cookie
   res.cookie("session", token, cookieOptions);
