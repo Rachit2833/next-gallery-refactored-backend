@@ -1,40 +1,46 @@
 const { promisify } = require("util");
 const User = require("../Schema/userSchema");
 const jwt = require('jsonwebtoken')
-async function useLoginTemporary(req, res) {
-  const { userId } = req.body;
-
-  if (!userId) {
-    return res.status(400).json({ message: "User ID is required" });
-  }
-
-  try {
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User Not Found" });
-    }
-
-    res.cookie("userId", userId, {
-      httpOnly: true,
-      secure: false, // Use `true` in production (requires HTTPS)
-      sameSite: "Lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
 
 
-    res.send("userId cookie has been set!");
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).send("error");
-  }
-}
+// Utility function for sending token in cookie
+const sendToken = (user, statusCode, res) => {
+  // Generate JWT
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES || "7d",
+  });
 
+  // Cookie expiration (28 days)
+  const cookieExpires = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000);
 
+  // Cookie options
+  const cookieOptions = {
+    expires: cookieExpires,
+    httpOnly: true, // prevent JS access
+    secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // cross-site cookie support
+    path: "/", // important for Vercel
+  };
 
+  // Set cookie
+  res.cookie("session", token, cookieOptions);
 
+  // Hide password from response
+  user.password = undefined;
 
+  res.status(statusCode).json({
+    success: true,
+    token, // optional, you can omit if you only want cookies
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    },
+  });
+};
 
-async function createNewUser(req, res) {
+// ====================== CREATE USER ======================
+export const createNewUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -48,41 +54,11 @@ async function createNewUser(req, res) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Create new user
+    // Create user
     const newUser = await User.create({ name, email, password });
 
-    // Hide password in response
-    newUser.password = undefined;
-
-    // Generate JWT token
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES || "7d",
-    });
-
-    // Cookie expiration (28 days)
-    const cookieExpires = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000);
-
-    // Cookie options
-    const cookieOptions = {
-      expires: cookieExpires,
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === "production", // HTTPS only in prod
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-      path: "/",
-    };
-
-    // Set cookie
-    res.cookie("session", token, cookieOptions);
-
-    // Send response without exposing token
-    res.status(201).json({
-      message: "User created successfully",
-      user: {
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-      },
-    });
+    // Send token + cookie
+    sendToken(newUser, 201, res);
   } catch (error) {
     console.error("User creation error:", error);
     res.status(500).json({
@@ -90,76 +66,39 @@ async function createNewUser(req, res) {
       error: error.message,
     });
   }
-}
+};
 
-
-
-
-
-
-
-async function login(req, res) {
+// ====================== LOGIN ======================
+export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
-      return res.status(400).json({
-        message: "Please Provide Email and Password",
-      });
+      return res.status(400).json({ message: "Please provide email and password" });
     }
 
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
-      return res.status(400).json({
-        message: "Invalid Email or Password",
-      });
+      return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // comparePassword should be await if it's async
+    // Compare password
     const isMatch = await user.comparePassword(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({
-        message: "Invalid Email or Password",
-      });
+      return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // Generate JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES || "7d",
-    });
-
-    // Cookie expiration (28 days for example)
-    const cookieExpires = new Date(
-      Date.now() + 28 * 24 * 60 * 60 * 1000
-    );
-
-    // Set cookie options
-    const cookieOptions = {
-      expires: cookieExpires,
-      httpOnly: true, // Prevent JS access
-      secure: process.env.NODE_ENV === "production", // HTTPS only in prod
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    };
-
-    // Send cookie
-    res.cookie("session", token, cookieOptions);
-
-    // Send response without exposing token
-    res.status(200).json({
-      message: "Login successful",
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-      },
-    });
+    // Send token + cookie
+    sendToken(user, 200, res);
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({
-      message: "Something Went Wrong",
+      message: "Something went wrong",
       error: error.message,
     });
   }
-}
+};
+
 
 
 
@@ -222,4 +161,5 @@ async function verifyUser(req, res) {
 
 
 
-module.exports = { useLoginTemporary, createNewUser, login, protect, verifyUser }
+module.exports = { createNewUser, login, protect, verifyUser }
+
